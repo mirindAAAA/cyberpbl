@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Encoding Toolkit</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --container-bg: white;
+            --container-shadow: 0 0 15px rgba(0,0,0,0.1);
+            --border-color: #ddd;
+            --primary-color: #4285F4;
+            --primary-hover: #3367D6;
+            --secondary-color: #EA4335;
+            --success-color: #34A853;
+            --success-hover: #2D8E47;
+            --warning-bg: #FFF3CD;
+            --warning-border: #FFC107;
+            --example-bg: #f9f9f9;
+            --example-border: #4285F4;
+            --output-bg: #f0f7ff;
+            --tab-active: #4285F4;
+            --tab-inactive: #e0e0e0;
+            --tab-text: #555;
+        }
+
+        .dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --container-bg: #1e1e1e;
+            --container-shadow: 0 0 15px rgba(0,0,0,0.3);
+            --border-color: #444;
+            --primary-color: #5a95f5;
+            --primary-hover: #4a85e5;
+            --secondary-color: #f55a5a;
+            --success-color: #4bbf6b;
+            --success-hover: #3aaf5a;
+            --warning-bg: #332900;
+            --warning-border: #ffd633;
+            --example-bg: #252525;
+            --example-border: #5a95f5;
+            --output-bg: #1a2a3a;
+            --tab-active: #5a95f5;
+            --tab-inactive: #333;
+            --tab-text: #ccc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: var(--container-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: var(--container-shadow);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        h2 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            transition: color 0.3s;
+        }
+        .disclaimer {
+            background-color: var(--warning-bg);
+            padding: 15px;
+            border-left: 5px solid var(--warning-border);
+            margin-bottom: 25px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        .btn-success:hover {
+            background-color: var(--success-hover);
+        }
+        .output-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: var(--output-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            word-wrap: break-word;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            white-space: pre-wrap;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .status {
+            margin-top: 10px;
+            font-style: italic;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+        .success {
+            color: var(--success-color);
+        }
+        .error {
+            color: var(--secondary-color);
+        }
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 100;
+        }
+        .tool-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .btn-group {
+            margin-top: 15px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: var(--tab-inactive);
+            color: var(--tab-text);
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            background-color: var(--tab-active);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .hash-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .hash-option {
+            display: flex;
+            align-items: center;
+        }
+        .hash-option input {
+            width: auto;
+            margin-right: 5px;
+        }
+        .hash-option label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+        .encoding-options {
+            margin-bottom: 15px;
+        }
+        .example {
+            background-color: var(--example-bg);
+            border-left: 3px solid var(--example-border);
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9em;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" id="darkModeToggle">🌙 Dark Mode</button>
+    
+    <div class="container">
+        <h1>Advanced Encoding Toolkit</h1>
+        
+        <div class="disclaimer">
+            <strong>Security Notice:</strong> Some encoding methods (like MD5, SHA1) are considered cryptographically broken and should not be used for password storage or security-sensitive applications.
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="base64">Base64</div>
+            <div class="tab" data-tab="url">URL</div>
+            <div class="tab" data-tab="hash">Hashing</div>
+            <div class="tab" data-tab="html">HTML</div>
+            <div class="tab" data-tab="binary">Binary/Hex</div>
+        </div>
+        
+        <!-- Base64 Section -->
+        <div class="tab-content active" id="base64-tab">
+            <h2>Base64 Encoding/Decoding</h2>
+            <div class="tool-description">
+                Convert text to Base64 encoded format or decode Base64 back to plain text. Base64 is commonly used to encode binary data for transmission over text-based protocols.
+            </div>
+            <div class="example">
+                <strong>Example:</strong> "Hello World" encodes to "SGVsbG8gV29ybGQ="
+            </div>
+            <label for="base64Input">Input Text:</label>
+            <textarea id="base64Input" placeholder="Enter text to encode or Base64 to decode"></textarea>
+            <div class="btn-group">
+                <button onclick="encodeBase64()">Encode to Base64</button>
+                <button onclick="decodeBase64()">Decode from Base64</button>
+                <button class="btn-success" onclick="copyToClipboard('base64Output')">Copy Result</button>
+                <button onclick="clearOutput('base64')">Clear</button>
+            </div>
+            <label>Result:</label>
+            <div class="output-box" id="base64Output"></div>
+            <div class="status" id="base64Status"></div>
+        </div>
+        
+        <!-- URL Section -->
+        <div class="tab-content" id="url-tab">
+            <h2>URL Encoding/Decoding</h2>
+            <div class="tool-description">
+                Encode text for use in URLs or decode URL-encoded text back to its original form. URL encoding replaces unsafe ASCII characters with "%" followed by two hexadecimal digits.
+            </div>
+            <div class="example">
+                <strong>Example:</strong> "Hello World!" encodes to "Hello%20World%21"
+            </div>
+            <label for="urlInput">Input Text:</label>
+            <textarea id="urlInput" placeholder="Enter text to encode or URL-encoded text to decode"></textarea>
+            <div class="btn-group">
+                <button onclick="encodeURL()">Encode URL</button>
+                <button onclick="decodeURL()">Decode URL</button>
+                <button class="btn-success" onclick="copyToClipboard('urlOutput')">Copy Result</button>
+                <button onclick="clearOutput('url')">Clear</button>
+            </div>
+            <label>Result:</label>
+            <div class="output-box" id="urlOutput"></div>
+            <div class="status" id="urlStatus"></div>
+        </div>
+        
+        <!-- Hashing Section -->
+        <div class="tab-content" id="hash-tab">
+            <h2>Hash Generator</h2>
+            <div class="tool-description">
+                Generate cryptographic hashes from input text. Note that some algorithms (MD5, SHA1) are considered insecure for cryptographic purposes.
+            </div>
+            <label for="hashInput">Input Text:</label>
+            <textarea id="hashInput" placeholder="Enter text to hash"></textarea>
+            
+            <div class="hash-options">
+                <div class="hash-option">
+                    <input type="checkbox" id="md5" checked>
+                    <label for="md5">MD5</label>
+                </div>
+                <div class="hash-option">
+                    <input type="checkbox" id="sha1">
+                    <label for="sha1">SHA-1</label>
+                </div>
+                <div class="hash-option">
+                    <input type="checkbox" id="sha256" checked>
+                    <label for="sha256">SHA-256</label>
+                </div>
+                <div class="hash-option">
+                    <input type="checkbox" id="sha512">
+                    <label for="sha512">SHA-512</label>
+                </div>
+                <div class="hash-option">
+                    <input type="checkbox" id="sha3">
+                    <label for="sha3">SHA-3</label>
+                </div>
+                <div class="hash-option">
+                    <input type="checkbox" id="ripemd160">
+                    <label for="ripemd160">RIPEMD-160</label>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button onclick="generateHashes()">Generate Hashes</button>
+                <button class="btn-success" onclick="copyToClipboard('hashOutput')">Copy All</button>
+                <button onclick="clearOutput('hash')">Clear</button>
+            </div>
+            <label>Results:</label>
+            <div class="output-box" id="hashOutput"></div>
+            <div class="status" id="hashStatus"></div>
+        </div>
+        
+        <!-- HTML Section -->
+        <div class="tab-content" id="html-tab">
+            <h2>HTML Encoding/Decoding</h2>
+            <div class="tool-description">
+                Encode text to HTML entities or decode HTML entities back to plain text. Useful for displaying HTML code on web pages or converting special characters to their entity equivalents.
+            </div>
+            <div class="example">
+                <strong>Example:</strong> "<div>" encodes to "&lt;div&gt;"
+            </div>
+            <label for="htmlInput">Input Text:</label>
+            <textarea id="htmlInput" placeholder="Enter text to encode or HTML entities to decode"></textarea>
+            <div class="btn-group">
+                <button onclick="encodeHTML()">Encode HTML</button>
+                <button onclick="decodeHTML()">Decode HTML</button>
+                <button class="btn-success" onclick="copyToClipboard('htmlOutput')">Copy Result</button>
+                <button onclick="clearOutput('html')">Clear</button>
+            </div>
+            <label>Result:</label>
+            <div class="output-box" id="htmlOutput"></div>
+            <div class="status" id="htmlStatus"></div>
+        </div>
+        
+        <!-- Binary/Hex Section -->
+        <div class="tab-content" id="binary-tab">
+            <h2>Binary/Hexadecimal Conversion</h2>
+            <div class="tool-description">
+                Convert text to binary or hexadecimal representation, or convert binary/hex back to text. Binary is base-2 (0s and 1s) and hexadecimal is base-16 (0-9 and A-F).
+            </div>
+            <div class="example">
+                <strong>Examples:</strong> 
+                "A" → Binary: "01000001" → Hex: "41"
+            </div>
+            <label for="binaryInput">Input Text:</label>
+            <textarea id="binaryInput" placeholder="Enter text to convert or binary/hex to decode"></textarea>
+            
+            <div class="encoding-options">
+                <label for="binaryConversionType">Conversion Type:</label>
+                <select id="binaryConversionType">
+                    <option value="textToBinary">Text to Binary</option>
+                    <option value="binaryToText">Binary to Text</option>
+                    <option value="textToHex">Text to Hexadecimal</option>
+                    <option value="hexToText">Hexadecimal to Text</option>
+                </select>
+            </div>
+            
+            <div class="btn-group">
+                <button onclick="convertBinary()">Convert</button>
+                <button class="btn-success" onclick="copyToClipboard('binaryOutput')">Copy Result</button>
+                <button onclick="clearOutput('binary')">Clear</button>
+            </div>
+            <label>Result:</label>
+            <div class="output-box" id="binaryOutput"></div>
+            <div class="status" id="binaryStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            body.classList.add('dark-mode');
+            darkModeToggle.textContent = '☀️ Light Mode';
+        }
+        
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            
+            if (isDarkMode) {
+                darkModeToggle.textContent = '☀️ Light Mode';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                darkModeToggle.textContent = '🌙 Dark Mode';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+
+        // Tab functionality
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and content
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+
+        // Base64 Functions
+        function encodeBase64() {
+            const input = document.getElementById("base64Input").value;
+            if (!input) {
+                document.getElementById("base64Status").textContent = "❌ Please enter text to encode";
+                document.getElementById("base64Status").className = "status error";
+                return;
+            }
+            try {
+                const encoded = btoa(unescape(encodeURIComponent(input)));
+                document.getElementById("base64Output").textContent = encoded;
+                document.getElementById("base64Status").textContent = "✅ Encoding successful";
+                document.getElementById("base64Status").className = "status success";
+            } catch (e) {
+                document.getElementById("base64Status").textContent = "❌ Error during encoding: " + e.message;
+                document.getElementById("base64Status").className = "status error";
+            }
+        }
+
+        function decodeBase64() {
+            const input = document.getElementById("base64Input").value.trim();
+            if (!input) {
+                document.getElementById("base64Status").textContent = "❌ Please enter Base64 to decode";
+                document.getElementById("base64Status").className = "status error";
+                return;
+            }
+            try {
+                const decoded = decodeURIComponent(escape(atob(input)));
+                document.getElementById("base64Output").textContent = decoded;
+                document.getElementById("base64Status").textContent = "✅ Decoding successful";
+                document.getElementById("base64Status").className = "status success";
+            } catch {
+                document.getElementById("base64Output").textContent = "";
+                document.getElementById("base64Status").textContent = "❌ Invalid Base64 input - ensure it's properly encoded";
+                document.getElementById("base64Status").className = "status error";
+            }
+        }
+
+        // URL Functions
+        function encodeURL() {
+            const input = document.getElementById("urlInput").value;
+            if (!input) {
+                document.getElementById("urlStatus").textContent = "❌ Please enter text to encode";
+                document.getElementById("urlStatus").className = "status error";
+                return;
+            }
+            try {
+                const encoded = encodeURIComponent(input);
+                document.getElementById("urlOutput").textContent = encoded;
+                document.getElementById("urlStatus").textContent = "✅ Encoding successful";
+                document.getElementById("urlStatus").className = "status success";
+            } catch (e) {
+                document.getElementById("urlStatus").textContent = "❌ Error during encoding: " + e.message;
+                document.getElementById("urlStatus").className = "status error";
+            }
+        }
+
+        function decodeURL() {
+            const input = document.getElementById("urlInput").value.trim();
+            if (!input) {
+                document.getElementById("urlStatus").textContent = "❌ Please enter URL-encoded text to decode";
+                document.getElementById("urlStatus").className = "status error";
+                return;
+            }
+            try {
+                const decoded = decodeURIComponent(input.replace(/\+/g, ' '));
+                document.getElementById("urlOutput").textContent = decoded;
+                document.getElementById("urlStatus").textContent = "✅ Decoding successful";
+                document.getElementById("urlStatus").className = "status success";
+            } catch {
+                document.getElementById("urlOutput").textContent = "";
+                document.getElementById("urlStatus").textContent = "❌ Invalid URL-encoded input";
+                document.getElementById("urlStatus").className = "status error";
+            }
+        }
+
+        // Hashing Functions
+        function generateHashes() {
+            const input = document.getElementById("hashInput").value;
+            if (!input) {
+                document.getElementById("hashStatus").textContent = "❌ Please enter text to hash";
+                document.getElementById("hashStatus").className = "status error";
+                return;
+            }
+            
+            let output = "";
+            
+            // MD5
+            if (document.getElementById("md5").checked) {
+                const hash = CryptoJS.MD5(input).toString();
+                output += `MD5: ${hash}\n\n`;
+            }
+            
+            // SHA-1
+            if (document.getElementById("sha1").checked) {
+                const hash = CryptoJS.SHA1(input).toString();
+                output += `SHA-1: ${hash}\n\n`;
+            }
+            
+            // SHA-256
+            if (document.getElementById("sha256").checked) {
+                const hash = CryptoJS.SHA256(input).toString();
+                output += `SHA-256: ${hash}\n\n`;
+            }
+            
+            // SHA-512
+            if (document.getElementById("sha512").checked) {
+                const hash = CryptoJS.SHA512(input).toString();
+                output += `SHA-512: ${hash}\n\n`;
+            }
+            
+            // SHA-3
+            if (document.getElementById("sha3").checked) {
+                const hash = CryptoJS.SHA3(input).toString();
+                output += `SHA-3: ${hash}\n\n`;
+            }
+            
+            // RIPEMD-160
+            if (document.getElementById("ripemd160").checked) {
+                const hash = CryptoJS.RIPEMD160(input).toString();
+                output += `RIPEMD-160: ${hash}\n\n`;
+            }
+            
+            if (output === "") {
+                document.getElementById("hashStatus").textContent = "❌ Please select at least one hash algorithm";
+                document.getElementById("hashStatus").className = "status error";
+                return;
+            }
+            
+            document.getElementById("hashOutput").textContent = output.trim();
+            document.getElementById("hashStatus").textContent = "✅ Hashing completed";
+            document.getElementById("hashStatus").className = "status success";
+        }
+
+        // HTML Functions
+        function encodeHTML() {
+            const input = document.getElementById("htmlInput").value;
+            if (!input) {
+                document.getElementById("htmlStatus").textContent = "❌ Please enter text to encode";
+                document.getElementById("htmlStatus").className = "status error";
+                return;
+            }
+            
+            const encoded = input.replace(/[\u00A0-\u9999<>&]/g, function(i) {
+                return '&#' + i.charCodeAt(0) + ';';
+            });
+            
+            document.getElementById("htmlOutput").textContent = encoded;
+            document.getElementById("htmlStatus").textContent = "✅ Encoding successful";
+            document.getElementById("htmlStatus").className = "status success";
+        }
+
+        function decodeHTML() {
+            const input = document.getElementById("htmlInput").value.trim();
+            if (!input) {
+                document.getElementById("htmlStatus").textContent = "❌ Please enter HTML entities to decode";
+                document.getElementById("htmlStatus").className = "status error";
+                return;
+            }
+            
+            const decoded = input.replace(/&#(\d+);/g, function(match, dec) {
+                return String.fromCharCode(dec);
+            });
+            
+            document.getElementById("htmlOutput").textContent = decoded;
+            document.getElementById("htmlStatus").textContent = "✅ Decoding successful";
+            document.getElementById("htmlStatus").className = "status success";
+        }
+
+        // Binary/Hex Functions
+        function convertBinary() {
+            const input = document.getElementById("binaryInput").value;
+            const conversionType = document.getElementById("binaryConversionType").value;
+            
+            if (!input) {
+                document.getElementById("binaryStatus").textContent = "❌ Please enter input text";
+                document.getElementById("binaryStatus").className = "status error";
+                return;
+            }
+            
+            try {
+                let result = "";
+                
+                switch(conversionType) {
+                    case "textToBinary":
+                        result = textToBinary(input);
+                        break;
+                    case "binaryToText":
+                        result = binaryToText(input);
+                        break;
+                    case "textToHex":
+                        result = textToHex(input);
+                        break;
+                    case "hexToText":
+                        result = hexToText(input);
+                        break;
+                }
+                
+                document.getElementById("binaryOutput").textContent = result;
+                document.getElementById("binaryStatus").textContent = "✅ Conversion successful";
+                document.getElementById("binaryStatus").className = "status success";
+            } catch (e) {
+                document.getElementById("binaryOutput").textContent = "";
+                document.getElementById("binaryStatus").textContent = "❌ Error during conversion: " + e.message;
+                document.getElementById("binaryStatus").className = "status error";
+            }
+        }
+
+        function textToBinary(text) {
+            return text.split('').map(char => {
+                return char.charCodeAt(0).toString(2).padStart(8, '0');
+            }).join(' ');
+        }
+
+        function binaryToText(binary) {
+            // Remove all whitespace first
+            const cleanBinary = binary.replace(/\s+/g, '');
+            
+            // Split into 8-bit chunks
+            const chunks = cleanBinary.match(/.{1,8}/g);
+            
+            if (!chunks) {
+                throw new Error("Invalid binary input");
+            }
+            
+            return chunks.map(chunk => {
+                if (chunk.length < 8) {
+                    throw new Error("Binary chunks must be 8 bits long");
+                }
+                return String.fromCharCode(parseInt(chunk, 2));
+            }).join('');
+        }
+
+        function textToHex(text) {
+            return text.split('').map(char => {
+                return char.charCodeAt(0).toString(16).padStart(2, '0');
+            }).join(' ');
+        }
+
+        function hexToText(hex) {
+            // Remove all whitespace first
+            const cleanHex = hex.replace(/\s+/g, '');
+            
+            // Split into 2-character chunks
+            const chunks = cleanHex.match(/.{1,2}/g);
+            
+            if (!chunks) {
+                throw new Error("Invalid hex input");
+            }
+            
+            return chunks.map(chunk => {
+                if (chunk.length !== 2) {
+                    throw new Error("Hex chunks must be 2 characters long");
+                }
+                return String.fromCharCode(parseInt(chunk, 16));
+            }).join('');
+        }
+
+        // Utility functions
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            if (!text) {
+                alert("Nothing to copy!");
+                return;
+            }
+            navigator.clipboard.writeText(text)
+                .then(() => alert("Copied to clipboard!"))
+                .catch(err => console.error('Failed to copy: ', err));
+        }
+        
+        function clearOutput(tab) {
+            document.getElementById(`${tab}Input`).value = "";
+            document.getElementById(`${tab}Output`).textContent = "";
+            document.getElementById(`${tab}Status`).textContent = "";
+            document.getElementById(`${tab}Status`).className = "status";
+        }
+    </script>
+</body>
+</html>

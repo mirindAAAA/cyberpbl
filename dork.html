@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Google Dork Generator - Security Research Tool</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --container-bg: white;
+            --container-shadow: 0 0 15px rgba(0,0,0,0.1);
+            --border-color: #ddd;
+            --primary-color: #4285F4;
+            --primary-hover: #3367D6;
+            --secondary-color: #EA4335;
+            --success-color: #34A853;
+            --success-hover: #2D8E47;
+            --warning-bg: #FFF3CD;
+            --warning-border: #FFC107;
+            --example-bg: #f9f9f9;
+            --example-border: #4285F4;
+            --advanced-bg: #f0f7ff;
+        }
+
+        .dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --container-bg: #1e1e1e;
+            --container-shadow: 0 0 15px rgba(0,0,0,0.3);
+            --border-color: #444;
+            --primary-color: #5a95f5;
+            --primary-hover: #4a85e5;
+            --secondary-color: #f55a5a;
+            --success-color: #4bbf6b;
+            --success-hover: #3aaf5a;
+            --warning-bg: #332900;
+            --warning-border: #ffd633;
+            --example-bg: #252525;
+            --example-border: #5a95f5;
+            --advanced-bg: #1a2a3a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--container-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: var(--container-shadow);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .disclaimer {
+            background-color: var(--warning-bg);
+            padding: 15px;
+            border-left: 5px solid var(--warning-border);
+            margin-bottom: 25px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
+        select {
+            height: 42px;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        #result {
+            margin-top: 25px;
+            padding: 18px;
+            background-color: var(--example-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            min-height: 60px;
+            word-wrap: break-word;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            white-space: pre-wrap;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .copy-btn {
+            background-color: var(--success-color);
+            margin-left: 12px;
+        }
+        .copy-btn:hover {
+            background-color: var(--success-hover);
+        }
+        .category {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+        .category h2 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            transition: color 0.3s;
+        }
+        .category:last-child {
+            border-bottom: none;
+        }
+        .examples {
+            margin-top: 30px;
+            background-color: var(--example-bg);
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid var(--example-border);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .examples h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            transition: color 0.3s;
+        }
+        .examples ul {
+            padding-left: 20px;
+        }
+        .examples li {
+            margin-bottom: 8px;
+        }
+        .advanced-options {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: var(--advanced-bg);
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .toggle-advanced {
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: inline-block;
+            transition: color 0.3s;
+        }
+        .toggle-advanced:hover {
+            text-decoration: underline;
+        }
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" id="darkModeToggle">🌙 Dark Mode</button>
+    
+    <div class="container">
+        <h1>Advanced Google Dork Generator</h1>
+        
+        <div class="disclaimer">
+            <strong>Ethical Use Disclaimer:</strong> This tool is for <strong>educational purposes and authorized security research only</strong>. Unauthorized scanning or exploitation of computer systems is illegal. Always obtain proper authorization before conducting any security testing.
+        </div>
+        
+        <!-- Rest of your HTML content remains the same -->
+        <div class="category">
+            <h2>1. Initial Footholds</h2>
+            <div class="form-group">
+                <label for="foothold-type">Search for potential entry points:</label>
+                <select id="foothold-type">
+                    <option value="">-- Select Foothold Type --</option>
+                    <option value="login_pages">Login Portals</option>
+                    <option value="open_dir">Open Directories</option>
+                    <option value="vuln_files">Common Vulnerable Files</option>
+                    <option value="error_msgs">Error Messages Revealing Info</option>
+                    <option value="custom_foothold">Custom Foothold Search</option>
+                </select>
+                <div id="foothold-options" class="advanced-options">
+                    <div id="login-pages-opt" style="display:none;">
+                        <input type="text" id="login-page-text" placeholder="e.g., admin, wp-login">
+                    </div>
+                    <div id="custom-foothold-opt" style="display:none;">
+                        <input type="text" id="custom-foothold-text" placeholder="e.g., intitle:'index of' '/backup'">
+                    </div>
+                </div>
+                <span class="toggle-advanced" onclick="toggleOptions('foothold')">+ Advanced options</span>
+            </div>
+        </div>
+        
+        <div class="category">
+            <h2>2. Credential Discovery</h2>
+            <div class="form-group">
+                <label for="credential-type">Find credentials and user information:</label>
+                <select id="credential-type">
+                    <option value="">-- Select Credential Type --</option>
+                    <option value="usernames">Files Containing Usernames</option>
+                    <option value="passwords">Files Containing Passwords</option>
+                    <option value="db_creds">Database Credentials</option>
+                    <option value="config_creds">Configuration Files with Credentials</option>
+                    <option value="custom_cred">Custom Credential Search</option>
+                </select>
+                <div id="credential-options" class="advanced-options">
+                    <div id="custom-cred-opt" style="display:none;">
+                        <input type="text" id="custom-cred-text" placeholder="e.g., 'password' filetype:txt">
+                    </div>
+                </div>
+                <span class="toggle-advanced" onclick="toggleOptions('credential')">+ Advanced options</span>
+            </div>
+        </div>
+        
+        <div class="category">
+            <h2>3. Sensitive Information</h2>
+            <div class="form-group">
+                <label for="sensitive-type">Find sensitive data exposures:</label>
+                <select id="sensitive-type">
+                    <option value="">-- Select Information Type --</option>
+                    <option value="shopping_info">Online Shopping Information</option>
+                    <option value="network_data">Network/Vulnerability Data</option>
+                    <option value="juicy_info">Files with Juicy Information</option>
+                    <option value="error_info">Error Messages with Sensitive Data</option>
+                    <option value="custom_sensitive">Custom Sensitive Info Search</option>
+                </select>
+                <div id="sensitive-options" class="advanced-options">
+                    <div id="custom-sensitive-opt" style="display:none;">
+                        <input type="text" id="custom-sensitive-text" placeholder="e.g., 'credit card' filetype:csv">
+                    </div>
+                </div>
+                <span class="toggle-advanced" onclick="toggleOptions('sensitive')">+ Advanced options</span>
+            </div>
+        </div>
+        
+        <div class="category">
+            <h2>4. System Detection</h2>
+            <div class="form-group">
+                <label for="system-type">Identify systems and vulnerabilities:</label>
+                <select id="system-type">
+                    <option value="">-- Select System Type --</option>
+                    <option value="web_servers">Web Server Detection</option>
+                    <option value="vuln_servers">Vulnerable Servers</option>
+                    <option value="iot_devices">IoT/Network Devices</option>
+                    <option value="vuln_advisories">Advisories and Known Vulnerabilities</option>
+                    <option value="custom_system">Custom System Search</option>
+                </select>
+                <div id="system-options" class="advanced-options">
+                    <div id="web-servers-opt" style="display:none;">
+                        <input type="text" id="web-server-text" placeholder="e.g., Apache, IIS, nginx">
+                    </div>
+                    <div id="custom-system-opt" style="display:none;">
+                        <input type="text" id="custom-system-text" placeholder="e.g., 'PHP 5.6.40' intitle:'index of'">
+                    </div>
+                </div>
+                <span class="toggle-advanced" onclick="toggleOptions('system')">+ Advanced options</span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="site-filter">Site/domain filter (optional):</label>
+            <input type="text" id="site-filter" placeholder="example.com or .gov">
+        </div>
+        
+        <button id="generate-btn">Generate Security Dork</button>
+        <button id="copy-btn" class="copy-btn">Copy to Clipboard</button>
+        
+        <div id="result"></div>
+        
+        <div class="examples">
+            <h3>Example Security Dorks</h3>
+            <ul>
+                <li><strong>Login Portals:</strong> intitle:"login" "admin" OR inurl:/admin/login</li>
+                <li><strong>Exposed DB Creds:</strong> filetype:env DB_USERNAME DB_PASSWORD</li>
+                <li><strong>Sensitive Directories:</strong> intitle:"index of" /backup</li>
+                <li><strong>Error Messages:</strong> "error in your SQL syntax" | "warning: mysql_connect()"</li>
+                <li><strong>Vulnerable Servers:</strong> "Apache/2.4.7 (Ubuntu)" ext:php</li>
+                <li><strong>Exposed Configs:</strong> ext:xml | ext:conf | ext:cnf | ext:reg | ext:inf</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        // Check for saved user preference
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            body.classList.add('dark-mode');
+            darkModeToggle.textContent = '☀️ Light Mode';
+        }
+        
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            
+            if (isDarkMode) {
+                darkModeToggle.textContent = '☀️ Light Mode';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                darkModeToggle.textContent = '🌙 Dark Mode';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+
+        // Rest of your JavaScript remains the same
+        // Toggle advanced options
+        function toggleOptions(type) {
+            const options = document.getElementById(`${type}-options`);
+            options.style.display = options.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Show relevant options when select changes
+        document.getElementById('foothold-type').addEventListener('change', function() {
+            hideAllOptions('foothold');
+            const value = this.value;
+            if (value === 'login_pages') {
+                document.getElementById('login-pages-opt').style.display = 'block';
+            } else if (value === 'custom_foothold') {
+                document.getElementById('custom-foothold-opt').style.display = 'block';
+            }
+        });
+
+        document.getElementById('credential-type').addEventListener('change', function() {
+            hideAllOptions('credential');
+            if (this.value === 'custom_cred') {
+                document.getElementById('custom-cred-opt').style.display = 'block';
+            }
+        });
+
+        document.getElementById('sensitive-type').addEventListener('change', function() {
+            hideAllOptions('sensitive');
+            if (this.value === 'custom_sensitive') {
+                document.getElementById('custom-sensitive-opt').style.display = 'block';
+            }
+        });
+
+        document.getElementById('system-type').addEventListener('change', function() {
+            hideAllOptions('system');
+            const value = this.value;
+            if (value === 'web_servers') {
+                document.getElementById('web-servers-opt').style.display = 'block';
+            } else if (value === 'custom_system') {
+                document.getElementById('custom-system-opt').style.display = 'block';
+            }
+        });
+
+        function hideAllOptions(prefix) {
+            const options = document.getElementById(`${prefix}-options`).children;
+            for (let i = 0; i < options.length; i++) {
+                options[i].style.display = 'none';
+            }
+        }
+
+        // Generate dork based on selections
+        document.getElementById('generate-btn').addEventListener('click', function() {
+            let dorkQuery = '';
+            const siteFilter = document.getElementById('site-filter').value.trim();
+            
+            // Footholds
+            const footholdType = document.getElementById('foothold-type').value;
+            switch(footholdType) {
+                case 'login_pages':
+                    const loginText = document.getElementById('login-page-text').value.trim();
+                    dorkQuery += loginText ? `intitle:"login" OR intitle:"sign in" OR inurl:login OR inurl:signin ${loginText}` : 
+                                           'intitle:"login" OR intitle:"sign in" OR inurl:login OR inurl:signin';
+                    break;
+                case 'open_dir':
+                    dorkQuery += 'intitle:"index of" OR "parent directory"';
+                    break;
+                case 'vuln_files':
+                    dorkQuery += 'ext:php | ext:asp | ext:aspx | ext:jsp | ext:pl | ext:cfm | ext:cgi';
+                    break;
+                case 'error_msgs':
+                    dorkQuery += '"error in your SQL syntax" | "warning: mysql_connect()" | "fatal error" | "exception"';
+                    break;
+                case 'custom_foothold':
+                    dorkQuery += document.getElementById('custom-foothold-text').value.trim();
+                    break;
+            }
+            
+            // Credentials
+            const credentialType = document.getElementById('credential-type').value;
+            switch(credentialType) {
+                case 'usernames':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + 'filetype:log "username" | "user" | "login"';
+                    break;
+                case 'passwords':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + '"password" filetype:txt | filetype:log | filetype:env';
+                    break;
+                case 'db_creds':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + 'filetype:env DB_USERNAME DB_PASSWORD | filetype:ini "password"';
+                    break;
+                case 'config_creds':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + 'ext:yml | ext:yaml | ext:toml | ext:properties "password"';
+                    break;
+                case 'custom_cred':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + document.getElementById('custom-cred-text').value.trim();
+                    break;
+            }
+            
+            // Sensitive Information
+            const sensitiveType = document.getElementById('sensitive-type').value;
+            switch(sensitiveType) {
+                case 'shopping_info':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + '"order" "credit card" | "transaction" "amount" filetype:csv';
+                    break;
+                case 'network_data':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + '"network diagram" | "vulnerability scan" filetype:pdf';
+                    break;
+                case 'juicy_info':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + '"confidential" | "secret" | "internal" filetype:doc | filetype:xls';
+                    break;
+                case 'error_info':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + '"stack trace" | "database error" | "api key"';
+                    break;
+                case 'custom_sensitive':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + document.getElementById('custom-sensitive-text').value.trim();
+                    break;
+            }
+            
+            // System Detection
+            const systemType = document.getElementById('system-type').value;
+            switch(systemType) {
+                case 'web_servers':
+                    const serverText = document.getElementById('web-server-text').value.trim();
+                    dorkQuery += (dorkQuery ? ' | ' : '') + (serverText ? `"Server: ${serverText}"` : '"Server: Apache" | "Server: nginx" | "Server: IIS"');
+                    break;
+                case 'vuln_servers':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + '"PHP 5.6.40" | "Apache/2.4.7" | "WordPress 4.0"';
+                    break;
+                case 'iot_devices':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + 'intitle:"Router" | intitle:"Camera" | intitle:"DVR" inurl:viewerframe?mode=';
+                    break;
+                case 'vuln_advisories':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + '"vulnerability report" | "security advisory" filetype:pdf';
+                    break;
+                case 'custom_system':
+                    dorkQuery += (dorkQuery ? ' | ' : '') + document.getElementById('custom-system-text').value.trim();
+                    break;
+            }
+            
+            // Apply site filter if specified
+            if (siteFilter) {
+                if (siteFilter.startsWith('.')) {
+                    dorkQuery = `site:${siteFilter} (${dorkQuery})`;
+                } else {
+                    dorkQuery = `site:${siteFilter} ${dorkQuery}`;
+                }
+            }
+            
+            if (dorkQuery) {
+                document.getElementById('result').textContent = dorkQuery;
+            } else {
+                document.getElementById('result').textContent = 'Please select at least one search category.';
+            }
+        });
+
+        // Copy to clipboard
+        document.getElementById('copy-btn').addEventListener('click', function() {
+            const resultText = document.getElementById('result').textContent;
+            if (resultText && !resultText.startsWith('Please select')) {
+                navigator.clipboard.writeText(resultText)
+                    .then(() => alert('Security dork copied to clipboard!'))
+                    .catch(err => console.error('Failed to copy: ', err));
+            }
+        });
+    </script>
+</body>
+</html>

