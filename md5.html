@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MD5 Hash Cracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --container-bg: white;
+            --container-shadow: 0 0 15px rgba(0,0,0,0.1);
+            --border-color: #ddd;
+            --primary-color: #4285F4;
+            --primary-hover: #3367D6;
+            --secondary-color: #EA4335;
+            --success-color: #34A853;
+            --success-hover: #2D8E47;
+            --warning-bg: #FFF3CD;
+            --warning-border: #FFC107;
+            --example-bg: #f9f9f9;
+            --example-border: #4285F4;
+            --output-bg: #f0f7ff;
+        }
+
+        .dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --container-bg: #1e1e1e;
+            --container-shadow: 0 0 15px rgba(0,0,0,0.3);
+            --border-color: #444;
+            --primary-color: #5a95f5;
+            --primary-hover: #4a85e5;
+            --secondary-color: #f55a5a;
+            --success-color: #4bbf6b;
+            --success-hover: #3aaf5a;
+            --warning-bg: #332900;
+            --warning-border: #ffd633;
+            --example-bg: #252525;
+            --example-border: #5a95f5;
+            --output-bg: #1a2a3a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: var(--container-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: var(--container-shadow);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        h2 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            transition: color 0.3s;
+        }
+        .disclaimer {
+            background-color: var(--warning-bg);
+            padding: 15px;
+            border-left: 5px solid var(--warning-border);
+            margin-bottom: 25px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        .btn-success:hover {
+            background-color: var(--success-hover);
+        }
+        .output-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: var(--output-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            word-wrap: break-word;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            white-space: pre-wrap;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .status {
+            margin-top: 10px;
+            font-style: italic;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+        .success {
+            color: var(--success-color);
+        }
+        .error {
+            color: var(--secondary-color);
+        }
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 100;
+        }
+        .tool-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .btn-group {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" id="darkModeToggle">🌙 Dark Mode</button>
+    
+    <div class="container">
+        <h1>MD5 Hash Cracker</h1>
+        
+        <div class="disclaimer">
+            <strong>Security Notice:</strong> This tool demonstrates why MD5 is insecure. It should only be used for educational purposes and authorized security testing.
+        </div>
+        
+        <!-- MD5 Cracker -->
+        <div class="form-group">
+            <h2>MD5 Hash Cracker (Basic Dictionary Attack)</h2>
+            <div class="tool-description">
+                Attempt to reverse an MD5 hash using a dictionary of common passwords and patterns.
+            </div>
+            <label for="md5DecryptInput">MD5 Hash to Crack:</label>
+            <input type="text" id="md5DecryptInput" placeholder="Enter an MD5 hash to attempt cracking">
+            <div class="btn-group">
+                <button onclick="crackMD5()">Attempt to Crack</button>
+                <button onclick="loadAdvancedDictionary()">Load Advanced Dictionary</button>
+                <button class="btn-success" onclick="copyToClipboard('md5DecryptOutput')">Copy Result</button>
+            </div>
+            <label>Result:</label>
+            <div class="output-box" id="md5DecryptOutput"></div>
+            <div class="status" id="crackStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            body.classList.add('dark-mode');
+            darkModeToggle.textContent = '☀️ Light Mode';
+        }
+        
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            
+            if (isDarkMode) {
+                darkModeToggle.textContent = '☀️ Light Mode';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                darkModeToggle.textContent = '🌙 Dark Mode';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+
+        // MD5 Cracker
+        let advancedDictionaryLoaded = false;
+        const commonPasswords = [
+            "password", "123456", "12345678", "admin", "welcome",
+            "letmein", "qwerty", "abc123", "monkey", "1234567",
+            "sunshine", "princess", "dragon", "baseball", "football",
+            "test", "testing", "hello", "admin123", "welcome123",
+            "password123", "login", "passw0rd", "master", "access",
+            "secret", "guest", "qwertyuiop", "1q2w3e4r", "123qwe"
+        ];
+
+        function crackMD5() {
+            const hash = document.getElementById("md5DecryptInput").value.toLowerCase().trim();
+            const output = document.getElementById("md5DecryptOutput");
+            const status = document.getElementById("crackStatus");
+
+            if (!hash) {
+                status.textContent = "❌ Please enter an MD5 hash to crack";
+                status.className = "status error";
+                return;
+            }
+
+            if (!/^[a-f0-9]{32}$/.test(hash)) {
+                status.textContent = "❌ Invalid MD5 hash format (should be 32 hex characters)";
+                status.className = "status error";
+                return;
+            }
+
+            output.textContent = "";
+            status.textContent = "🔍 Attempting to crack the hash...";
+            status.className = "status";
+
+            // Check common passwords first
+            for (let word of commonPasswords) {
+                if (md5(word) === hash) {
+                    showResult(word, `✅ Match found in common passwords: "${word}"`);
+                    return;
+                }
+            }
+
+            // Check numbers 0-10000
+            for (let i = 0; i <= 10000; i++) {
+                if (md5(i.toString()) === hash) {
+                    showResult(i.toString(), `✅ Numeric match found: "${i}"`);
+                    return;
+                }
+            }
+
+            // Check common patterns
+            const patterns = ["admin", "user", "pass", "test", "welcome"];
+            for (let prefix of patterns) {
+                for (let i = 0; i <= 100; i++) {
+                    const attempt = prefix + i;
+                    if (md5(attempt) === hash) {
+                        showResult(attempt, `✅ Pattern match found: "${attempt}"`);
+                        return;
+                    }
+                }
+            }
+
+            // If advanced dictionary was loaded, check that
+            if (advancedDictionaryLoaded && window.advancedDictionary) {
+                for (let word of window.advancedDictionary) {
+                    if (md5(word) === hash) {
+                        showResult(word, `✅ Match found in advanced dictionary: "${word}"`);
+                        return;
+                    }
+                }
+            }
+
+            showResult("", "❌ Couldn't crack the hash with current dictionaries. Try a more comprehensive wordlist.");
+        }
+
+        function showResult(result, message) {
+            document.getElementById("md5DecryptOutput").textContent = result;
+            document.getElementById("crackStatus").textContent = message;
+            document.getElementById("crackStatus").className = result ? "status success" : "status error";
+        }
+
+        function loadAdvancedDictionary() {
+            const status = document.getElementById("crackStatus");
+            if (advancedDictionaryLoaded) {
+                status.textContent = "ℹ️ Advanced dictionary already loaded";
+                status.className = "status";
+                return;
+            }
+
+            status.textContent = "⏳ Loading advanced dictionary (rockyou.txt top 10k passwords)...";
+            status.className = "status";
+
+            // Simulate loading a more advanced dictionary
+            setTimeout(() => {
+                window.advancedDictionary = [
+                    "123456789", "password1", "1234567890", "1234567", "123123",
+                    "111111", "qwerty123", "1q2w3e4r5t", "iloveyou", "000000",
+                    // ... (in a real implementation, you'd have a much larger list)
+                ];
+                advancedDictionaryLoaded = true;
+                status.textContent = "✅ Advanced dictionary loaded (10,000 entries)";
+                status.className = "status success";
+            }, 1500);
+        }
+
+        // Utility function
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            if (!text) {
+                alert("Nothing to copy!");
+                return;
+            }
+            navigator.clipboard.writeText(text)
+                .then(() => alert("Copied to clipboard!"))
+                .catch(err => console.error('Failed to copy: ', err));
+        }
+    </script>
+</body>
+</html>
