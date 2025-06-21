@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Toolkit</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #f8f9fa;
+            --secondary: #e9ecef;
+            --accent: #4361ee;
+            --accent-light: #4895ef;
+            --accent-lighter: #4cc9f0;
+            --text: #212529;
+            --text-light: #495057;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --glow: 0 5px 20px rgba(67, 97, 238, 0.2);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @font-face {
+            font-family: 'Poppins';
+            src: url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(72, 149, 239, 0.05) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(76, 201, 240, 0.05) 0%, transparent 30%);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(67, 97, 238, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(67, 97, 238, 0.5); }
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            border-radius: 4px;
+            animation: pulse 2s infinite;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2.5rem;
+            margin-top: 4rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem 1.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(5px);
+            animation: slideIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: var(--glow);
+        }
+
+        .tool-card:nth-child(1) { animation-delay: 0.1s; }
+        .tool-card:nth-child(2) { animation-delay: 0.2s; }
+        .tool-card:nth-child(3) { animation-delay: 0.3s; }
+        .tool-card:nth-child(4) { animation-delay: 0.4s; }
+        .tool-card:nth-child(5) { animation-delay: 0.5s; }
+        .tool-card:nth-child(6) { animation-delay: 0.6s; }
+        .tool-card:nth-child(7) { animation-delay: 0.7s; }
+        .tool-card:nth-child(8) { animation-delay: 0.8s; }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+
+        .tool-icon-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(72, 149, 239, 0.1));
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .tool-card:hover .tool-icon-container {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.2), rgba(72, 149, 239, 0.2));
+        }
+
+        .tool-icon {
+            font-size: 2.2rem;
+            color: var(--accent);
+            transition: var(--transition);
+        }
+
+        .tool-card:hover .tool-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .tool-title {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-align: center;
+            color: var(--accent);
+            transition: var(--transition);
+        }
+
+        .tool-card:hover .tool-title {
+            color: var(--accent-light);
+        }
+
+        .tool-desc {
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .tool-btn {
+            display: block;
+            width: max-content;
+            margin: 0 auto;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(45deg, var(--accent), var(--accent-light));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .tool-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+            background: linear-gradient(45deg, var(--accent-light), var(--accent-lighter));
+        }
+
+        .tool-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+        }
+
+        .tool-btn:hover::before {
+            left: 100%;
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            top: 20%;
+            left: 10%;
+            animation: float 18s ease-in-out infinite, rotate 40s linear infinite reverse;
+        }
+
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-light);
+            top: 60%;
+            left: 70%;
+            animation: float 15s ease-in-out infinite reverse, rotate 50s linear infinite;
+        }
+
+        .shape-3 {
+            width: 200px;
+            height: 200px;
+            background: var(--accent-lighter);
+            top: 30%;
+            left: 80%;
+            animation: float 20s ease-in-out infinite, rotate 30s linear infinite reverse;
+        }
+
+        .shape-4 {
+            width: 350px;
+            height: 350px;
+            background: var(--accent);
+            top: 70%;
+            left: 20%;
+            animation: float 25s ease-in-out infinite reverse, rotate 45s linear infinite;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .bubble:nth-child(5) {
+            width: 20px;
+            height: 20px;
+            top: 10%;
+            left: 85%;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(6) {
+            width: 15px;
+            height: 15px;
+            top: 80%;
+            left: 15%;
+            animation-delay: 1s;
+        }
+
+        .bubble:nth-child(7) {
+            width: 25px;
+            height: 25px;
+            top: 30%;
+            left: 25%;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(8) {
+            width: 18px;
+            height: 18px;
+            top: 65%;
+            left: 75%;
+            animation-delay: 3s;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 6rem;
+            padding: 2rem 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        @media (max-width: 768px) {
+            .tool-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .tool-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Special animation for first card */
+        /* .featured-card {
+            position: relative;
+        }
+
+        .featured-card::after {
+            content: 'Most Popular';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(45deg, #f72585, #b5179e);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(247, 37, 133, 0.3);
+            animation: pulse 2s infinite;
+        } */
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        
+    </div>
+
+    <div class="container">
+        <header>
+            <h1 class="logo">Vuln<strong>X</strong>plorer</h1>
+            <p class="subtitle">A comprehensive collection of cybersecurity tools for penetration testers, ethical hackers, and security researchers</p>
+        </header>
+
+        <div class="tool-grid">
+            <!-- Google Dork Generator -->
+            <div class="tool-card featured-card">
+                <div class="tool-icon-container">
+                    <i class="fas fa-search tool-icon"></i>
+                </div>
+                <h3 class="tool-title">Google Dork Generator</h3>
+                <p class="tool-desc">Generate advanced Google search queries to find vulnerable systems and sensitive data.</p>
+                <a href="dork.html" class="tool-btn">Open Tool</a>
+            </div>
+
+            <!-- XSS Payload Generator -->
+            <div class="tool-card">
+                <div class="tool-icon-container">
+                    <i class="fas fa-code tool-icon"></i>
+                </div>
+                <h3 class="tool-title">XSS Payload Generator</h3>
+                <p class="tool-desc">Create and test Cross-Site Scripting payloads for web application security testing.</p>
+                <a href="xss.html" class="tool-btn">Open Tool</a>
+            </div>
+
+            <!-- SQLi Payload Generator -->
+            <div class="tool-card">
+                <div class="tool-icon-container">
+                    <i class="fas fa-database tool-icon"></i>
+                </div>
+                <h3 class="tool-title">SQLi Payload Generator</h3>
+                <p class="tool-desc">Generate SQL injection payloads to test database vulnerabilities in web applications.</p>
+                <a href="sqli.html" class="tool-btn">Open Tool</a>
+            </div>
+
+            <!-- Command Injection Payload Generator -->
+            <div class="tool-card">
+                <div class="tool-icon-container">
+                    <i class="fas fa-terminal tool-icon"></i>
+                </div>
+                <h3 class="tool-title">Command Injection Generator</h3>
+                <p class="tool-desc">Create payloads to test OS command injection vulnerabilities in web applications.</p>
+                <a href="cmd.html" class="tool-btn">Open Tool</a>
+            </div>
+
+            <!-- Wordlists for Bruteforce -->
+            <div class="tool-card">
+                <div class="tool-icon-container">
+                    <i class="fas fa-key tool-icon"></i>
+                </div>
+                <h3 class="tool-title">Bruteforce Wordlists</h3>
+                <p class="tool-desc">Access curated wordlists for password cracking and directory brute-forcing.</p>
+                <a href="brute.html" class="tool-btn">Open Tool</a>
+            </div>
+
+            <!-- JSON/XML Injection Payload Generator -->
+            <div class="tool-card">
+                <div class="tool-icon-container">
+                    <i class="fas fa-file-code tool-icon"></i>
+                </div>
+                <h3 class="tool-title">JSON/XML Injection</h3>
+                <p class="tool-desc">Generate payloads to test injection vulnerabilities in JSON and XML parsers.</p>
+                <a href="jason.html" class="tool-btn">Open Tool</a>
+            </div>
+
+            <!-- Base64 Encoder -->
+            <div class="tool-card">
+                <div class="tool-icon-container">
+                    <i class="fas fa-lock tool-icon"></i>
+                </div>
+                <h3 class="tool-title">Base64 Encoder/Decoder</h3>
+                <p class="tool-desc">Encode and decode Base64 data for various security testing scenarios.</p>
+                <a href="base64.html" class="tool-btn">Open Tool</a>
+            </div>
+
+            <!-- Hash Cracker -->
+            <div class="tool-card">
+                <div class="tool-icon-container">
+                    <i class="fas fa-unlock-alt tool-icon"></i>
+                </div>
+                <h3 class="tool-title">MD5 Hash Cracker</h3>
+                <p class="tool-desc">Attempt to crack MD5 hashes using a database of common password hashes.</p>
+                <a href="md5.html" class="tool-btn">Open Tool</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>©2025 : Team <strong>Xploit</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        // Enhanced floating animation for cards
+        document.querySelectorAll('.tool-card').forEach((card, index) => {
+            // Initial random offset
+            const randomOffset = Math.random() * 20 - 10;
+            card.style.transform = `translateY(${randomOffset}px)`;
+            
+            // Continuous floating animation
+            card.style.animation = `float ${6 + index}s ease-in-out infinite`;
+            card.style.animationDelay = `${index * 0.2}s`;
+            
+            // 3D tilt effect on hover
+            card.addEventListener('mousemove', (e) => {
+                const x = e.clientX - card.getBoundingClientRect().left;
+                const y = e.clientY - card.getBoundingClientRect().top;
+                
+                const centerX = card.offsetWidth / 2;
+                const centerY = card.offsetHeight / 2;
+                
+                const angleX = (y - centerY) / 15;
+                const angleY = (centerX - x) / 15;
+                
+                card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) translateZ(20px)`;
+                card.querySelector('.tool-icon-container').style.transform = `scale(1.1) translateZ(30px)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                const randomOffset = Math.random() * 20 - 10;
+                card.style.transform = `translateY(${randomOffset}px)`;
+                card.style.animation = `float ${6 + index}s ease-in-out infinite`;
+                card.querySelector('.tool-icon-container').style.transform = 'scale(1)';
+            });
+        });
+
+        // Bubble generator
+        function createBubbles() {
+            const floatingShapes = document.querySelector('.floating-shapes');
+            for (let i = 0; i < 10; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.width = `${Math.random() * 30 + 10}px`;
+                bubble.style.height = bubble.style.width;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.top = `${Math.random() * 100}%`;
+                bubble.style.opacity = Math.random() * 0.6 + 0.4;
+                bubble.style.animation = `float ${Math.random() * 10 + 5}s ease-in-out infinite ${Math.random() * 5}s`;
+                floatingShapes.appendChild(bubble);
+            }
+        }
+
+        createBubbles();
+
+        // Typewriter effect for subtitle with cursor
+        const subtitle = document.querySelector('.subtitle');
+        const text = subtitle.textContent;
+        subtitle.textContent = '';
+        
+        let i = 0;
+        function typeWriter() {
+            if (i < text.length) {
+                subtitle.textContent += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, Math.random() * 30 + 20);
+            } else {
+                // Add blinking cursor after typing
+                const cursor = document.createElement('span');
+                cursor.className = 'cursor';
+                cursor.innerHTML = '|';
+                subtitle.appendChild(cursor);
+                
+                // Cursor blink animation
+                setInterval(() => {
+                    cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';
+                }, 500);
+            }
+        }
+        
+        setTimeout(typeWriter, 800);
+
+        // Background particles
+        function createParticles() {
+            const particlesContainer = document.querySelector('.floating-shapes');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = `${Math.random() * 6 + 2}px`;
+                particle.style.height = particle.style.width;
+                particle.style.background = `hsl(${Math.random() * 60 + 200}, 80%, 70%)`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animation = `float ${Math.random() * 20 + 10}s linear infinite ${Math.random() * 5}s`;
+                particle.style.opacity = Math.random() * 0.4 + 0.1;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // Dynamic gradient background animation
+        const body = document.body;
+        let hue = 210;
+        
+        function animateBackground() {
+            hue = (hue + 0.5) % 360;
+            body.style.background = `
+                radial-gradient(circle at 10% 20%, hsl(${hue}, 80%, 90%) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, hsl(${(hue + 60) % 360}, 80%, 90%) 0%, transparent 30%),
+                #f8f9fa`;
+            requestAnimationFrame(animateBackground);
+        }
+        
+        animateBackground();
+    </script>
+</body>
+</html>
