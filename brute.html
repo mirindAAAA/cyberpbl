@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bruteforce Wordlist Generator | CyberSec Toolkit</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #f8f9fa;
+            --secondary: #e9ecef;
+            --accent: #4361ee;
+            --accent-light: #4895ef;
+            --accent-lighter: #4cc9f0;
+            --text: #212529;
+            --text-light: #495057;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --glow: 0 5px 20px rgba(67, 97, 238, 0.2);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --warning-bg: #FFF3CD;
+            --warning-border: #FFC107;
+            --example-bg: #f9f9f9;
+            --example-border: #4285F4;
+            --advanced-bg: #f0f7ff;
+            --error-color: #EA4335;
+            --success-color: #34A853;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @font-face {
+            font-family: 'Poppins';
+            src: url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(72, 149, 239, 0.05) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(76, 201, 240, 0.05) 0%, transparent 30%);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(67, 97, 238, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(67, 97, 238, 0.5); }
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(5px);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            border-radius: 4px;
+            animation: pulse 2s infinite;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .disclaimer {
+            background-color: var(--warning-bg);
+            padding: 15px;
+            border-left: 5px solid var(--warning-border);
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .category {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            animation: slideIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .category:nth-child(1) { animation-delay: 0.1s; }
+        .category:nth-child(2) { animation-delay: 0.2s; }
+        .category:nth-child(3) { animation-delay: 0.3s; }
+
+        .category:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--glow);
+        }
+
+        .category h2 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        select, input[type="text"], textarea, input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: var(--text);
+            transition: var(--transition);
+        }
+
+        select {
+            height: 46px;
+        }
+
+        textarea {
+            min-height: 120px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            resize: vertical;
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--accent), var(--accent-light));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+            background: linear-gradient(45deg, var(--accent-light), var(--accent-lighter));
+        }
+
+        #wordlistOutput {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background-color: var(--example-bg);
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            min-height: 100px;
+            word-wrap: break-word;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            background: linear-gradient(45deg, var(--success-color), #2D8E47);
+            margin-left: 12px;
+        }
+
+        .copy-btn:hover {
+            background: linear-gradient(45deg, #2D8E47, #1E7E34);
+        }
+
+        .examples {
+            margin-top: 2rem;
+            background-color: var(--example-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--example-border);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .examples h3 {
+            color: var(--accent);
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .examples ul {
+            padding-left: 20px;
+        }
+
+        .examples li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .advanced-options {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--advanced-bg);
+            border-radius: 8px;
+        }
+
+        .toggle-advanced {
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: inline-block;
+            transition: var(--transition);
+        }
+
+        .toggle-advanced:hover {
+            text-decoration: underline;
+            color: var(--accent-light);
+        }
+
+        .payload-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .payload-options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-weight: normal;
+            padding: 8px 12px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .payload-options label:hover {
+            background: rgba(67, 97, 238, 0.2);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .checkbox-group input {
+            margin-right: 0.8rem;
+            width: auto;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            top: 20%;
+            left: 10%;
+            animation: float 18s ease-in-out infinite, rotate 40s linear infinite reverse;
+        }
+
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-light);
+            top: 60%;
+            left: 70%;
+            animation: float 15s ease-in-out infinite reverse, rotate 50s linear infinite;
+        }
+
+        .shape-3 {
+            width: 200px;
+            height: 200px;
+            background: var(--accent-lighter);
+            top: 30%;
+            left: 80%;
+            animation: float 20s ease-in-out infinite, rotate 30s linear infinite reverse;
+        }
+
+        .shape-4 {
+            width: 350px;
+            height: 350px;
+            background: var(--accent);
+            top: 70%;
+            left: 20%;
+            animation: float 25s ease-in-out infinite reverse, rotate 45s linear infinite;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .bubble:nth-child(5) {
+            width: 20px;
+            height: 20px;
+            top: 10%;
+            left: 85%;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(6) {
+            width: 15px;
+            height: 15px;
+            top: 80%;
+            left: 15%;
+            animation-delay: 1s;
+        }
+
+        .bubble:nth-child(7) {
+            width: 25px;
+            height: 25px;
+            top: 30%;
+            left: 25%;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(8) {
+            width: 18px;
+            height: 18px;
+            top: 65%;
+            left: 75%;
+            animation-delay: 3s;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2rem;
+            background: var(--accent);
+            margin-left: 2px;
+            animation: blink 0.7s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1 class="logo">BRUTEFORCE WORDLIST GENERATOR</h1>
+            <p class="subtitle">Create comprehensive wordlists for authorized security testing and research</p>
+        </header>
+        
+        <div class="disclaimer">
+            <strong>Ethical Use Disclaimer:</strong> This tool is for <strong>educational purposes and authorized security research only</strong>. Unauthorized brute force attacks on computer systems are illegal. Always obtain proper authorization before conducting any security testing.
+        </div>
+        
+        <div class="category">
+            <h2>1. Wordlist Configuration</h2>
+            <div class="form-group">
+                <label for="wordlistType">Wordlist Type</label>
+                <select id="wordlistType">
+                    <option value="passwords">Common Passwords</option>
+                    <option value="usernames">Common Usernames</option>
+                    <option value="directories">Directory/File Names</option>
+                    <option value="custom">Custom Pattern</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="category">
+            <h2>2. Custom Pattern Options</h2>
+            <div id="customOptions" class="hidden">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customPrefix">Prefix (optional)</label>
+                        <input type="text" id="customPrefix" placeholder="Prefix">
+                    </div>
+                    <div class="form-group">
+                        <label for="customSuffix">Suffix (optional)</label>
+                        <input type="text" id="customSuffix" placeholder="Suffix">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customMin">Min length</label>
+                        <input type="number" id="customMin" min="1" value="4">
+                    </div>
+                    <div class="form-group">
+                        <label for="customMax">Max length</label>
+                        <input type="number" id="customMax" min="1" value="8">
+                    </div>
+                    <div class="form-group">
+                        <label for="customCharset">Character Set</label>
+                        <select id="customCharset">
+                            <option value="numeric">Numeric (0-9)</option>
+                            <option value="loweralpha">Lowercase Letters (a-z)</option>
+                            <option value="upperalpha">Uppercase Letters (A-Z)</option>
+                            <option value="alpha">Letters (a-z, A-Z)</option>
+                            <option value="alphanumeric">Alphanumeric (a-z, A-Z, 0-9)</option>
+                            <option value="all">All Printable ASCII</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="advanced-options">
+                <h3>Advanced Options</h3>
+                <div class="payload-options">
+                    <label><input type="checkbox" id="leetTransform"> Apply leet speak transformations</label>
+                    <label><input type="checkbox" id="appendNumbers"> Append numbers (0-9)</label>
+                    <label><input type="checkbox" id="prependNumbers"> Prepend numbers (0-9)</label>
+                </div>
+                
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="wordCount">Number of words to generate</label>
+                    <input type="number" id="wordCount" min="10" max="10000" value="100">
+                </div>
+            </div>
+            <span class="toggle-advanced" onclick="toggleOptions('advanced')">+ Advanced options</span>
+        </div>
+        
+        <div class="category">
+            <h2>3. Generated Wordlist</h2>
+            <textarea id="wordlistOutput" class="result-area" readonly></textarea>
+            <div class="action-buttons">
+                <button id="generateBtn">Generate Wordlist</button>
+                <button id="copyBtn" class="copy-btn">Copy to Clipboard</button>
+                <button id="downloadBtn">Download Wordlist</button>
+            </div>
+        </div>
+        
+        <div class="examples">
+            <h3>Example Wordlist Patterns</h3>
+            <ul>
+                <li><strong>Common Passwords:</strong> password, 123456, qwerty, letmein</li>
+                <li><strong>Username Patterns:</strong> admin, root, user[1-9], test[year]</li>
+                <li><strong>Directory Names:</strong> admin, backup, wp-admin, includes</li>
+                <li><strong>Custom Patterns:</strong> prefix[charset]suffix, [a-z]{4,8}</li>
+                <li><strong>Leet Transformations:</strong> p@ssw0rd, adm1n, t3st2023</li>
+                <li><strong>Number Appending:</strong> password123, admin2023, test99</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced floating animation for cards
+        document.querySelectorAll('.category').forEach((card, index) => {
+            // Initial random offset
+            const randomOffset = Math.random() * 20 - 10;
+            card.style.transform = `translateY(${randomOffset}px)`;
+            
+            // Continuous floating animation
+            card.style.animation = `float ${6 + index}s ease-in-out infinite`;
+            card.style.animationDelay = `${index * 0.2}s`;
+        });
+
+        // Bubble generator
+        function createBubbles() {
+            const floatingShapes = document.querySelector('.floating-shapes');
+            for (let i = 0; i < 10; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.width = `${Math.random() * 30 + 10}px`;
+                bubble.style.height = bubble.style.width;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.top = `${Math.random() * 100}%`;
+                bubble.style.opacity = Math.random() * 0.6 + 0.4;
+                bubble.style.animation = `float ${Math.random() * 10 + 5}s ease-in-out infinite ${Math.random() * 5}s`;
+                floatingShapes.appendChild(bubble);
+            }
+        }
+
+        createBubbles();
+
+        // Typewriter effect for subtitle with cursor
+        const subtitle = document.querySelector('.subtitle');
+        const text = subtitle.textContent;
+        subtitle.textContent = '';
+        
+        let i = 0;
+        function typeWriter() {
+            if (i < text.length) {
+                subtitle.textContent += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, Math.random() * 30 + 20);
+            } else {
+                // Add blinking cursor after typing
+                const cursor = document.createElement('span');
+                cursor.className = 'cursor';
+                subtitle.appendChild(cursor);
+            }
+        }
+        
+        setTimeout(typeWriter, 800);
+
+        // Toggle advanced options
+        function toggleOptions(type) {
+            const options = document.querySelector(`.advanced-options`);
+            options.style.display = options.style.display === 'block' ? 'none' : 'block';
+            const toggle = document.querySelector('.toggle-advanced');
+            toggle.textContent = options.style.display === 'block' ? '- Hide advanced options' : '+ Advanced options';
+        }
+
+        // Show/hide custom options based on selection
+        document.getElementById('wordlistType').addEventListener('change', function() {
+            const customOptions = document.getElementById('customOptions');
+            if (this.value === 'custom') {
+                customOptions.classList.remove('hidden');
+            } else {
+                customOptions.classList.add('hidden');
+            }
+        });
+        
+        // Generate wordlist
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const wordlistType = document.getElementById('wordlistType').value;
+            const output = document.getElementById('wordlistOutput');
+            output.value = '';
+            
+            let wordlist = [];
+            
+            if (wordlistType === 'passwords') {
+                wordlist = generateCommonPasswords();
+            } else if (wordlistType === 'usernames') {
+                wordlist = generateCommonUsernames();
+            } else if (wordlistType === 'directories') {
+                wordlist = generateCommonDirectories();
+            } else if (wordlistType === 'custom') {
+                wordlist = generateCustomWordlist();
+            }
+            
+            // Apply advanced transformations
+            const leetTransform = document.getElementById('leetTransform').checked;
+            const appendNumbers = document.getElementById('appendNumbers').checked;
+            const prependNumbers = document.getElementById('prependNumbers').checked;
+            const wordCount = parseInt(document.getElementById('wordCount').value);
+            
+            if (leetTransform) {
+                wordlist = applyLeetTransform(wordlist);
+            }
+            
+            if (appendNumbers || prependNumbers) {
+                wordlist = applyNumberAppending(wordlist, appendNumbers, prependNumbers);
+            }
+            
+            // Limit to requested word count
+            wordlist = wordlist.slice(0, wordCount);
+            
+            output.value = wordlist.join('\n');
+        });
+        
+        // Common password list
+        function generateCommonPasswords() {
+            return [
+                'password', '123456', '12345678', '1234', 'qwerty', '12345', 
+                'dragon', 'baseball', 'football', 'letmein', 'monkey', 
+                'mustang', 'access', 'shadow', 'master', 'michael', 
+                'superman', '696969', '123123', 'batman', 'trustno1',
+                'admin', 'welcome', 'login', 'passw0rd', 'password1',
+                'sunshine', 'princess', 'azerty', '111111', '1234567',
+                '123456789', '1234567890', 'abc123', 'admin123', 'password123'
+            ];
+        }
+        
+        // Common username list
+        function generateCommonUsernames() {
+            return [
+                'admin', 'root', 'user', 'test', 'guest', 'info', 'adm', 
+                'mysql', 'user1', 'administrator', 'oracle', 'ftp', 'backup',
+                'anonymous', 'webmaster', 'operator', 'supervisor', 'manager',
+                'demo', 'service', 'support', 'tech', 'sysadmin', 'security'
+            ];
+        }
+        
+        // Common directory/file list
+        function generateCommonDirectories() {
+            return [
+                'admin', 'login', 'wp-admin', 'wp-login', 'administrator',
+                'backup', 'backups', 'old', 'new', 'test', 'tmp', 'temp',
+                'cgi-bin', 'images', 'img', 'css', 'js', 'includes', 'inc',
+                'config', 'configuration', 'db', 'database', 'sql', 'logs',
+                'secret', 'private', 'secure', 'uploads', 'download', 'assets'
+            ];
+        }
+        
+        // Custom wordlist generator
+        function generateCustomWordlist() {
+            const prefix = document.getElementById('customPrefix').value;
+            const suffix = document.getElementById('customSuffix').value;
+            const minLen = parseInt(document.getElementById('customMin').value);
+            const maxLen = parseInt(document.getElementById('customMax').value);
+            const charsetType = document.getElementById('customCharset').value;
+            
+            let charset = '';
+            if (charsetType === 'numeric') charset = '0123456789';
+            else if (charsetType === 'loweralpha') charset = 'abcdefghijklmnopqrstuvwxyz';
+            else if (charsetType === 'upperalpha') charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            else if (charsetType === 'alpha') charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            else if (charsetType === 'alphanumeric') charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            else charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+            
+            const wordlist = [];
+            const maxIterations = 1000; // Prevent infinite loops
+            
+            for (let i = 0; i < maxIterations && wordlist.length < 500; i++) {
+                const length = Math.floor(Math.random() * (maxLen - minLen + 1)) + minLen;
+                let word = '';
+                
+                for (let j = 0; j < length; j++) {
+                    word += charset.charAt(Math.floor(Math.random() * charset.length));
+                }
+                
+                word = prefix + word + suffix;
+                if (!wordlist.includes(word)) {
+                    wordlist.push(word);
+                }
+            }
+            
+            return wordlist;
+        }
+        
+        // Apply leet speak transformations
+        function applyLeetTransform(wordlist) {
+            const leetMap = {
+                'a': ['4', '@'],
+                'b': ['8'],
+                'e': ['3'],
+                'g': ['6', '9'],
+                'i': ['1', '!'],
+                'l': ['1', '|'],
+                'o': ['0'],
+                's': ['5', '$'],
+                't': ['7'],
+                'z': ['2']
+            };
+            
+            const transformed = [];
+            
+            for (const word of wordlist) {
+                transformed.push(word); // Keep original
+                
+                // Apply simple leet transformations
+                let leetWord = word.toLowerCase();
+                for (const [char, replacements] of Object.entries(leetMap)) {
+                    for (const replacement of replacements) {
+                        leetWord = leetWord.replace(new RegExp(char, 'g'), replacement);
+                    }
+                }
+                
+                if (leetWord !== word.toLowerCase()) {
+                    transformed.push(leetWord);
+                }
+            }
+            
+            return transformed;
+        }
+        
+        // Apply number appending/prepending
+        function applyNumberAppending(wordlist, append, prepend) {
+            const transformed = [];
+            
+            for (const word of wordlist) {
+                transformed.push(word); // Keep original
+                
+                if (append) {
+                    for (let i = 0; i <= 9; i++) {
+                        transformed.push(word + i);
+                    }
+                    for (let i = 0; i <= 99; i++) {
+                        transformed.push(word + (i < 10 ? '0' + i : i));
+                    }
+                }
+                
+                if (prepend) {
+                    for (let i = 0; i <= 9; i++) {
+                        transformed.push(i + word);
+                    }
+                    for (let i = 0; i <= 99; i++) {
+                        transformed.push((i < 10 ? '0' + i : i) + word);
+                    }
+                }
+            }
+            
+            return transformed;
+        }
+        
+        // Copy to clipboard
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const output = document.getElementById('wordlistOutput');
+            if (output.value.trim()) {
+                navigator.clipboard.writeText(output.value)
+                    .then(() => alert('Wordlist copied to clipboard!'))
+                    .catch(err => console.error('Failed to copy: ', err));
+            }
+        });
+        
+        // Download wordlist
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const output = document.getElementById('wordlistOutput');
+            if (!output.value.trim()) {
+                alert('Please generate a wordlist first');
+                return;
+            }
+            
+            const blob = new Blob([output.value], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'wordlist.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // Dynamic gradient background animation
+        const body = document.body;
+        let hue = 210;
+        
+        function animateBackground() {
+            hue = (hue + 0.5) % 360;
+            body.style.background = `
+                radial-gradient(circle at 10% 20%, hsl(${hue}, 80%, 90%) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, hsl(${(hue + 60) % 360}, 80%, 90%) 0%, transparent 30%),
+                #f8f9fa`;
+            requestAnimationFrame(animateBackground);
+        }
+        
+        animateBackground();
+    </script>
+</body>
+</html>
